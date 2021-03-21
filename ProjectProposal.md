@@ -2,10 +2,25 @@
 
 ## Introduction
 
-Define:
-- quantitative transaction database
-- *minutil*
-- TWU
+### Abstract
+
+In class, we were introduced to the problem of frequent itemset mining. In simplest form, the goal of frequent itemset mining is to discover *sets of items* (itemsets) *that appear frequently* (defined by support). One of the biggest limitations of frequent itemset mining is that it assumes that all itemsets are equally valuable. For instance, suppose that in a dataset of grocery items, we find that the itemset $\{milk, bread\}$ is very frequent. This transaction, while frequent, does not really have any value to us since these are both lower cost items in comparison to, for instance, $\{champagne, caviar\}$.
+
+This limitation called for a generalization of the frequent itemsets problem to **high utility itemset mining.** The fundamental difference between frequent itemset mining and high utility itemset mining is that when we are performing high utility itemset mining, evry item has an associated weight describing how profitable the item is. High utility itemset mining also considers the quantity of the items in the database.
+
+In this project, we plan to provide a preliminary introduction to the field of high utility itemset mining by implementing and evaluating the performance of two separate high utility itemset mining algorithms and evaluate their performance
+
+### Definitions
+
+Before continuing with our algorithms, we define terminology that is essential to understand our algorithms and their performance.
+
+1. **Transaction Database:** A set of records (transactions) indicating the items purchased by customers at different times. Typically, transactions are represented as rows in a dataset.
+    a. **Quantitative Transaction Database:** A transaction database that includes the quantities of items in transactions and weights indicating the relative importance of each item to the user
+2. **Support measure:** The support of an itemset $X$ in a transaction database $D$ is defined as $sup(X) = |(T|X \subset T \cap T \in D)|$, or the number of transactions that contain $X$.
+3. **Frequent itemset:** An itemset is frequent if its support $sup(X)$ is no less than the minsup threshold.
+4. **Utility:** The utility of an item $i$ in a transaction $T_c$ is denoted as $u(i, T_c)$ and is defined as $u(i, T_c) = p(i) * q(i, T_c)$, where $p(i)$ denotes the external utility, or weight, of the item, and $q(i, T_c)$ denotes the internal utility, or the quantity of $i$ in the transaction $T_c$.
+5. **High-utility itemset:** An itemset $X$ is a *high-utility itemset* if its utility $u(X)$ is no less than a user-specified minimum utility threshold *minutil* set by the user.
+6. **The TWU measure:** The *transaction utility* (TU) of a transaction $T_c$ is the sum of the utilities of all the items in $T_c$.
 
 ## Algorithms
 
