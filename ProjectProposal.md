@@ -47,7 +47,7 @@ After we have created the utility-list of $Pxy$, a recursive call to *FHMSearch*
 ### A short description of different algorithms.
 Our baseline is the Two-Phase algorithm, and we are comparing it to the Fast High-Utility Miner algorithm. The Two-Phase algorithm first generates a set of candidate high utility itemsets by overestimating their utilities in phase 1 using a breadth-first search approach. The algorithm overestimates the utilities of the itemset using the Transaction weighted utilization of an itemset. The Transaction weighted utilization of an itemset is the sum of the transaction utilities of an itemset. Thus, using the Transaction-Weighted Downward Closure Property, the Two-Phase algorithm can prune itemsets in the search space since the supersets of an infrequent itemset are infrequent, and subsets of a frequent itemset are frequent. Therefore, only the combinations of high transaction-weighted utilization itemsets are added into the candidate set at each level during the level-wise search. In phase 2, the algorithm performs only one extra database scan to filter the overestimated itemsets.
 
-The Fast High-Utility Miner algorithm uses a depth-first search approach to prune the search space and eliminate low utility itemsets in one scoop. The algorithm first scans the database to calculate the Transaction Weighted Utility(TWU) of each item. Then the algorithm identifies a set of all items having a Transaction Weighted Utility greater than the minimum threshold utility specified by the user. A second database scan is done to build a utility list (an ordering of the TWU's of the itemsets in ascending order) and to build an Estimated Utility Co-Occurrence Structure (a set of triples of the form $\ (a,b,c) \in I^* \times I^* \times \mathbb{R}$ such that $\ TWU({a,b}) = c)$. After the utility list construction, a depth-first search is done to calculate each itemset's utility and explore its extensions and prune the search space using the Estimated Utility Co-Occurrence Structure (EUCS). The pruning condition is that if there is no tuple$\ (x,y,c)$ in EUCS such that$\ c \geq$ the minimum threshold specified by the user, then the itemset and all its supersets are low utility itemsets and do not need to be explored. 
+The Fast High-Utility Miner algorithm uses a depth-first search approach to prune the search space and eliminate low utility itemsets in one scoop. The algorithm first scans the database to calculate the Transaction Weighted Utility(TWU) of each item. Then the algorithm identifies a set of all items having a Transaction Weighted Utility greater than the minimum threshold utility specified by the user. A second database scan is done to build a utility list (an ordering of the TWU's of the itemsets in ascending order) and to build an Estimated Utility Co-Occurrence Structure (a set of triples of the form $\ (a,b,c) \in I^* \times I^* \times \mathbb{R}$ such that $\ TWU({a,b}) = c)$. After the utility list construction, a depth-first search is done to calculate each itemset's utility and explore its extensions and prune the search space using the Estimated Utility Co-Occurrence Structure (EUCS). The pruning condition is that if there is no tuple$\ (x,y,c)$ in EUCS such that$\ c \geq$ the minimum threshold specified by the user, then the itemset and all its supersets are low utility itemsets and do not need to be explored.
 
 ### Explain how you will compare your algorithm to the baseline.
 We intend to compare the FHM algorithm to the Two-Phase algorithm in three aspects: Execution time, Scalability and memory usage. To compare the execution time aspect, we intend to vary the minimum utility on different dataset sizes and check both algorithms' runtime. To compare the scalability aspect, we intend to vary the number of transactions for each dataset while setting the minimum utility parameter to observe the influence of the number of transactions on execution time. Lastly, we intend to make a comparison of the memory usage of the two algorithms in megabytes.
@@ -56,11 +56,11 @@ We intend to compare the FHM algorithm to the Two-Phase algorithm in three aspec
 
 The basis for our experiments came from previous research literature on both FHM and two-phase specifically. Concretely, we plan to test the following:
 
-1. **Execution time:** Obviously, one of the most important criteria to test would be execution time of the algorithms. Especially as the data scales larger, it is important that our algorithms perform as quickly as possible. To do this, we will implement a similar timing procedure to HW1 on Frequent Itemset Mining using ```timit()```.
+1. **Execution time:** Obviously, one of the most important criteria to test would be execution time of the algorithms. Especially as the data scales larger, it is important that our algorithms perform as quickly as possible. To do this, we will implement a similar timing procedure to HW1 on Frequent Itemset Mining using `timit()`.
 
 2. **Pruning effectiveness:** One of the major differences between FHM and Two-Phase is the implementation of pruning through a mechanism named EUCP (Estimated Utility Co-occurance Pruning), which relies on a structure called the EUCS, as previously mentioned. To do this, we will measure the percentage of candidates pruned for each dataset, and attempt to see if a relationship exists between pruning and runtime.
 
-3. **Memory overhead:** We should also be concerned about memory for both the Two-Phase and FHM algorithms. We can do this by monitoring the memory footprint of each algorithm. The library ```psutil``` can be used to show the memory footprint of a particular program.
+3. **Memory overhead:** We should also be concerned about memory for both the Two-Phase and FHM algorithms. We can do this by monitoring the memory footprint of each algorithm. The library `psutil` can be used to show the memory footprint of a particular program.
 
 # Datasets
 
@@ -75,8 +75,6 @@ The three datasets are:
 
 ## Work
 
-// TODO: split the following items into smaller steps
-
 - Write code for the Two-Phase algorithm.
 - Write code for the FHM algorithm.
 - Write experiment scripts to evaluate both algorithms.
@@ -84,8 +82,6 @@ The three datasets are:
 - Produce the final video.
 
 ## Plan
-
-// TODO: describe how we will submit the following
 
 Submit by phase 3:
 
@@ -100,13 +96,13 @@ Submit by phase 4:
 - Results of experiments
 - Final video
 
-## Logistics
+We will submit our materials via a compressed file.
 
-// TODO: decide who will do what
+## Logistics
 
 We have a [GitHub repository](https://github.com/cosc-254-huim/huim) to share code and data among the members of the group.
 
-We plan to split up the work as follows. The first member's main responsibility is to write the code for the Two-Phase algorithm. Similarly, the second member's main responsibility is to write the code for the FHM algorithm. The third member's main responsibility is to write the experiments that evaluate the two algorithms. The fourth member's main responsibility is to edit/produce the final video as well as help with smaller tasks that the first three members may have. All members are also responsible for writing content for the final video.
+We plan to split up the work as follows. The first member's main responsibility is to write the code for the Two-Phase algorithm. Similarly, the second member's main responsibility is to write the code for the FHM algorithm. The third and fourth members' main responsibilities are to write the experiments that evaluate the two algorithms. All members are also responsible for producing the final video.
 
 The timeline for our project is described below:
 
