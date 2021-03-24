@@ -53,9 +53,9 @@ After we have created the utility-list of $Pxy$, a recursive call to *FHMSearch*
 The basis for our experiments came from previous research literature on both FHM and two-phase specifically. Concretely, we plan to test the following:
 
 1. **Execution time:** Obviously, one of the most important criteria to test would be execution time of the algorithms. Especially as the data scales larger, it is important that our algorithms perform as quickly as possible. To do this, we will implement a similar timing procedure to HW1 on Frequent Itemset Mining using `timit()`.
-2. **Pruning effectiveness:** One of the major differences between FHM and Two-Phase is the implementation of pruning through a mechanism named EUCP (Estimated Utility Co-occurance Pruning), which relies on a structure called the EUCS, as previously mentioned. To do this, we will measure the percentage of candidates pruned for each dataset, and attempt to see if a relationship exists between pruning and runtime.
+2. **Pruning effectiveness:** One of the major differences between FHM and Two-Phase is the implementation of pruning through a mechanism named EUCP (Estimated Utility Co-occurrence Pruning), which relies on a structure called the EUCS, as previously mentioned. To do this, we will measure the percentage of candidates pruned for each dataset, and attempt to see if a relationship exists between pruning and runtime.
 3. **Memory overhead:** We should also be concerned about memory for both the Two-Phase and FHM algorithms. We can do this by monitoring the memory footprint of each algorithm. The library `psutil` can be used to show the memory footprint of a particular program.
-4. **Scalability:** We also want to make sure that our algorithms perform well as the number of transactions increases. To do this, we have chosen databases of intentionally different sizes,. We also ntend to vary the number of transactions for each dataset while setting the minimum utility parameter to observe the influence of the number of transactions on execution time.
+4. **Scalability:** We also want to make sure that our algorithms perform well as the number of transactions increases. To do this, we have chosen datasets of intentionally different sizes. We also intend to vary the number of transactions for each dataset while setting the minimum utility parameter to observe the influence of the number of transactions on execution time.
 
 # Datasets
 
@@ -64,7 +64,7 @@ We plan to evaluate the performance of our algorithms using three different data
 The three datasets are:
 
 1. **foodsmart:** This dataset represents customer transactions from a retail store. The size of the dataset is 4,141 transactions.
-2. **chainstore:** This dataset represents customer transactions from a major grocecy store chain in California, USA. The size of the dataset is 1,112,949 transactions.
+2. **chainstore:** This dataset represents customer transactions from a major grocery store chain in California, USA. The size of the dataset is 1,112,949 transactions.
 3. **Fruithut:** This is a dataset of customer transactions from a US retail store focusing on selling fruits. The dataset contains 181,970 transactions and 1,265 different items.
 
 ## Work
@@ -94,7 +94,7 @@ We will submit our materials via a compressed file.
 
 ## Logistics
 
-We have a GitHub repository that can be found [*here*](https://github.com/cosc-254-huim/huim) to share code and data among the members of the group.
+We have a GitHub repository that can be found by clicking here[*here*](https://github.com/cosc-254-huim/huim). The repository is where we share code and data among the members of the group.
 
 We plan to split up the work as follows. The first member's main responsibility is to write the code for the Two-Phase algorithm. Similarly, the second member's main responsibility is to write the code for the FHM algorithm. The third and fourth members' main responsibilities are to write the experiments that evaluate the two algorithms. All members are also responsible for producing the final video.
 
