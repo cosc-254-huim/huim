@@ -34,7 +34,12 @@ The FHM algorithm uses a depth-first search approach to prune the search space a
 
 ### Two-Phase
 
-Test
+The Two-phase algorithm is a high-utility itemset mining algorithm that works similarly to the Apriori algorithm. To mine frequent itemsets, the Apriori algorithm prunes the supersets of unfrequent itemsets. The Two-Phase algorithm prunes supersets of itemsets whose *transaction-weighted utility* is less than *minutil*  using the following properties: $TWU(X) ≥ U(X)$ and $TWU(X) ≥ U(Y) \forall Y \supset X$. If The algorithm takes in a quantitative transaction database and a *minutil* threshold as input. The first phase of this algorithm calculates the *TWU* of the necessary itemsets, pruning itemsets that can't be high-utility itemsets, and the second phase calculates the exact utility of the candidate high-utility itemsets.
+
+The first phase of the algorithm starts by calculates the *TWU* of all itemsets with length 1. It then performs a breadth first search to find larger itemsets that could have high utility. To get candidates at level $P_{k}$ it generates the possible itemsets from the itemsets in $P_{k-1}$ that are candidate high-utility itemsets. Then, any itemset in $P_{k}$ that is a superset of a low utility itemset from $P_{k-1}$ is removed. The *TWU* of the remaining itemsets are calculated and itemsets with $TWU ≥ *minutil*$ are candidate high-utility itemsets. For example, if for a dataset, the 1-itemsets with $TWU ≥ *minutil*$ are $(a, b, d)$, the *TWU* of the following 2-itemsets will be checked $(ab, ad, db)$. If $ad$ is a low-utility item it will not be used to generate 3-itemsets, however the 3-itemsets generated, $(abd)$ contains $ad$, therefore $abd$ is removed, and the *TWU* is not checked, as $abd$ can't be a high-utility itemset. The second phase scans the databse and calculates the *utility* of all candidate high-utility itemsets that are generated from phase one.
+
+The Two-Phase algorithm has a few drawbacks to consider. One limitation to consider is that the bound provided by using the *TWU* of itemsets is a very loose upper bound on the utility of itemsets. This means the algorithm could have to store many itemsets and calculate the utility of many itemsets with low-utility. Another drawback of the Two-Phase algorithm is it generates possible itemsets without looking at the database. This means it could be calculating the *TWU* of itemsets that do not appear in any transactions.
+
 
 ### FHM
 
