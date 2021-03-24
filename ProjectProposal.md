@@ -44,6 +44,42 @@ After we have created the utility-list of $Pxy$, a recursive call to *FHMSearch*
 
 ## Work
 
+// TODO: split the following items into smaller steps
+
+- Write code for the Two-Phase algorithm.
+- Write code for the FHM algorithm.
+- Write experiment scripts to evaluate both algorithms.
+- Write content for the final video.
+- Produce the final video.
+
 ## Plan
 
+// TODO: describe how we will submit the following
+
+Submit by phase 3:
+
+- Code for the Two-Phase algorithm.
+- Code for the FHM algorithm.
+
+Submit by phase 4:
+
+- Code for the Two-Phase algorithm.
+- Code for the FHM algorithm.
+- Code for the experiment scripts
+- Results of experiments
+- Final video
+
 ## Logistics
+
+// TODO: decide who will do what
+
+We have a [GitHub repository](https://github.com/cosc-254-huim/huim) to share code and data among the members of the group.
+
+We plan to split up the work as follows. The first member's main responsibility is to write the code for the Two-Phase algorithm. Similarly, the second member's main responsibility is to write the code for the FHM algorithm. The third member's main responsibility is to write the experiments that evaluate the two algorithms. The fourth member's main responsibility is to edit/produce the final video as well as help with smaller tasks that the first three members may have. All members are also responsible for writing content for the final video.
+
+The timeline for our project is described below:
+
+- April 19 (end of phase 3): finish writing the Two-Phase and FHM algorithms.
+- April 30: finish writing experiment scripts and evaluating both algorithms.
+- May 7: finish writing content for the final video.
+- May 21: finish making the final video.
