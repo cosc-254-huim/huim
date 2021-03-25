@@ -8,7 +8,7 @@ In class, we were introduced to the problem of frequent itemset mining. In simpl
 
 This limitation called for a generalization of the frequent itemsets problem to **high utility itemset mining.** The fundamental difference between frequent itemset mining and high utility itemset mining is that when we are performing high utility itemset mining, every item has an associated weight describing how profitable the item is. High utility itemset mining also considers the quantity of the items in the database.
 
-In this project, we plan to provide a preliminary introduction to the field of high utility itemset mining by implementing and evaluating the performance of two separate high utility itemset mining algorithms and evaluate their performance
+In this project, we plan to provide a preliminary introduction to the field of high utility itemset mining by implementing and evaluating the performance of two separate high utility itemset mining algorithms.
 
 ### Definitions
 
@@ -27,16 +27,16 @@ Our **problem definition** for high-utility itemset mining is to discover all hi
 ## Algorithms
 
 ### Abstract: Short Description of the Two Algorithms
-Our baseline is the Two-Phase algorithm, and we are comparing it to the Fast High-Utility Miner (FHM) algorithm. The Two-Phase algorithm first generates a set of candidate high utility itemsets by overestimating their utilities in phase 1 using a breadth-first search approach. The algorithm overestimates the utilities of the itemset using the TWU of an itemset. Again, the TWU of an itemset is the sum of the transaction utilities of an itemset. Thus, using the Transaction-Weighted Downward Closure Property, the Two-Phase algorithm can prune itemsets in the search space since the supersets of an infrequent itemset are infrequent, and subsets of a frequent itemset are frequent. Therefore, only the combinations of high TWU itemsets are added into the candidate set at each level during the level-wise search. In phase 2, the algorithm performs only one extra database scan to filter the overestimated itemsets.
+Our baseline is the Two-Phase algorithm, and we are comparing it to the Fast High-Utility Miner (FHM) algorithm. The Two-Phase algorithm first generates a set of candidate high utility itemsets by overestimating their utilities in phase 1 using a breadth-first search approach. The algorithm overestimates the utilities of the itemset using the TWU of an itemset. Again, the TWU of an itemset is the sum of the transaction utilities of an itemset. Thus, using the property that the TWU is a monotone upper-bound on the utility measure, the Two-Phase algorithm can prune itemsets in the search space since the supersets of an infrequent itemset are infrequent. Therefore, only the combinations of high TWU itemsets are added into the candidate set at each level during the level-wise search. In phase 2, the algorithm performs only one extra database scan to filter the overestimated itemsets.
 
-The FHM algorithm uses a depth-first search approach to prune the search space and eliminate low utility itemsets in one scoop. The algorithm first scans the database to calculate the TWU of each item. Then, the algorithm identifies a set of all items having a TWU greater than the minimum utility threshold specified by the user. A second database scan is done to build a utility list and to build an Estimated Utility Co-Occurrence Structure (a set of triples of the form $(a,b,c) \in I^* \times I^* \times \mathbb{R}$ such that $TWU({a,b}) = c$). After the utility list construction, a depth-first search is done to calculate each itemset's utility and explore its extensions and prune the search space using the Estimated Utility Co-Occurrence Structure (EUCS). The pruning condition is that if there is no tuple$(x,y,c)$ in the EUCS such that $c \geq$ the minimum utility threshold specified by the user, then the itemset and all its supersets are low utility itemsets and do not need to be explored.
+The FHM algorithm uses a depth-first search approach to prune the search space and eliminate low utility itemsets. The algorithm first scans the database to calculate the TWU of each item. Then, the algorithm identifies a set of all items having a TWU greater than the minimum utility threshold specified by the user. A second database scan is done to build a utility list and to build an Estimated Utility Co-Occurrence Structure (a set of triples of the form $(a,b,c) \in I^* \times I^* \times \mathbb{R}$ such that $TWU({a,b}) = c$). After the utility list construction, a depth-first search is done to calculate each itemset's utility and explore its extensions and prune the search space using the Estimated Utility Co-Occurrence Structure (EUCS). The pruning condition is that if there is no tuple $(a,b,c)$ in the EUCS such that $c \geq$ the minimum utility threshold specified by the user, then the itemset and all its supersets are low utility itemsets and do not need to be explored.
 
 
 ### Two-Phase
 
-The Two-phase algorithm is a high-utility itemset mining algorithm that works similarly to the Apriori algorithm. To mine frequent itemsets, the Apriori algorithm prunes the supersets of unfrequent itemsets. The Two-Phase algorithm prunes supersets of itemsets whose *transaction-weighted utility* is less than *minutil*  using the following properties: $TWU(X) ≥ U(X)$ and $TWU(X) ≥ U(Y) \forall Y \supset X$. If The algorithm takes in a quantitative transaction database and a *minutil* threshold as input. The first phase of this algorithm calculates the *TWU* of the necessary itemsets, pruning itemsets that can't be high-utility itemsets, and the second phase calculates the exact utility of the candidate high-utility itemsets.
+The Two-phase algorithm is a high-utility itemset mining algorithm that works similarly to the Apriori algorithm. To mine frequent itemsets, the Apriori algorithm prunes the supersets of infrequent itemsets. The Two-Phase algorithm prunes supersets of itemsets whose *transaction-weighted utility* is less than *minutil*  using the following properties: $TWU(X) \geq U(X)$ and $TWU(X) \geq U(Y) \forall Y \supset X$. If The algorithm takes in a quantitative transaction database and a *minutil* threshold as input. The first phase of this algorithm calculates the *TWU* of the necessary itemsets, pruning itemsets that can't be high-utility itemsets, and the second phase calculates the exact utility of the candidate high-utility itemsets.
 
-The first phase of the algorithm starts by calculates the *TWU* of all itemsets with length 1. It then performs a breadth first search to find larger itemsets that could have high utility. To get candidates at level $P_{k}$ it generates the possible itemsets from the itemsets in $P_{k-1}$ that are candidate high-utility itemsets. Then, any itemset in $P_{k}$ that is a superset of a low utility itemset from $P_{k-1}$ is removed. The *TWU* of the remaining itemsets are calculated and itemsets with $TWU ≥ *minutil*$ are candidate high-utility itemsets. For example, if for a dataset, the 1-itemsets with $TWU ≥ *minutil*$ are $(a, b, d)$, the *TWU* of the following 2-itemsets will be checked $(ab, ad, db)$. If $ad$ is a low-utility item it will not be used to generate 3-itemsets, however the 3-itemsets generated, $(abd)$ contains $ad$, therefore $abd$ is removed, and the *TWU* is not checked, as $abd$ can't be a high-utility itemset. The second phase scans the databse and calculates the *utility* of all candidate high-utility itemsets that are generated from phase one.
+The first phase of the algorithm starts by calculating the *TWU* of all itemsets with length 1. It then performs a breadth first search to find larger itemsets that could have high utility. To get candidates at level $P_{k}$ it generates the possible itemsets from the itemsets in $P_{k-1}$ that are candidate high-utility itemsets. Then, any itemset in $P_{k}$ that is a superset of a low utility itemset from $P_{k-1}$ is removed. The *TWU* of the remaining itemsets are calculated and itemsets with $TWU \geq minutil$ are candidate high-utility itemsets. For example, if for a dataset, the 1-itemsets with $TWU \geq minutil$ are $\{a\}$, $\{b\}$, and $\{d\}$, the *TWU* of the following 2-itemsets will be checked $\{a, b\}$, $\{a, d\}$, and $\{d, b\}$. If $\{a, d\}$ is a low-utility item it will not be used to generate 3-itemsets, however the 3-itemsets generated, $\{a, b, d\}$ contains $\{a, d\}$, therefore $\{a, b, d\}$ is removed, and the *TWU* is not checked, as $\{a, b, d\}$ can't be a high-utility itemset. The second phase scans the database and calculates the *utility* of all candidate high-utility itemsets that are generated from phase one.
 
 The Two-Phase algorithm has a few drawbacks to consider. One limitation to consider is that the bound provided by using the *TWU* of itemsets is a very loose upper bound on the utility of itemsets. This means the algorithm could have to store many itemsets and calculate the utility of many itemsets with low-utility. Another drawback of the Two-Phase algorithm is it generates possible itemsets without looking at the database. This means it could be calculating the *TWU* of itemsets that do not appear in any transactions.
 
@@ -55,9 +55,9 @@ After we have created the utility-list of $Pxy$, a recursive call to *FHMSearch*
 
 ## Experiments
 
-The basis for our experiments came from previous research literature on both FHM and two-phase specifically. Concretely, we plan to test the following:
+The basis for our experiments came from previous research literature on both Two-Phase and FHM specifically. Concretely, we plan to test the following:
 
-1. **Execution time:** Obviously, one of the most important criteria to test would be execution time of the algorithms. Especially as the data scales larger, it is important that our algorithms perform as quickly as possible. To do this, we will implement a similar timing procedure to HW1 on Frequent Itemset Mining using `timit()`.
+1. **Execution time:** Obviously, one of the most important criteria to test would be execution time of the algorithms. Especially as the data scales larger, it is important that our algorithms perform as quickly as possible. To do this, we will implement a similar timing procedure to HW1 on Frequent Items Mining using `timit()`.
 2. **Pruning effectiveness:** One of the major differences between FHM and Two-Phase is the implementation of pruning through a mechanism named EUCP (Estimated Utility Co-occurrence Pruning), which relies on a structure called the EUCS, as previously mentioned. To do this, we will measure the percentage of candidates pruned for each dataset, and attempt to see if a relationship exists between pruning and runtime.
 3. **Memory overhead:** We should also be concerned about memory for both the Two-Phase and FHM algorithms. We can do this by monitoring the memory footprint of each algorithm. The library `psutil` can be used to show the memory footprint of a particular program.
 4. **Scalability:** We also want to make sure that our algorithms perform well as the number of transactions increases. To do this, we have chosen datasets of intentionally different sizes. We also intend to vary the number of transactions for each dataset while setting the minimum utility parameter to observe the influence of the number of transactions on execution time.
@@ -68,9 +68,9 @@ We plan to evaluate the performance of our algorithms using three different data
 
 The three datasets are:
 
-1. **foodsmart:** This dataset represents customer transactions from a retail store. The size of the dataset is 4,141 transactions.
-2. **chainstore:** This dataset represents customer transactions from a major grocery store chain in California, USA. The size of the dataset is 1,112,949 transactions.
-3. **Fruithut:** This is a dataset of customer transactions from a US retail store focusing on selling fruits. The dataset contains 181,970 transactions and 1,265 different items.
+1. **foodsmart:** This dataset represents customer transactions from a retail store. The dataset has 4,141 transactions, 1,559 items, and an average item count of 4.42 per transaction.
+2. **chainstore:** This dataset represents customer transactions from a major grocery store chain in California, USA. The dataset has 1,112,949 transactions, 46,086 items, and an average item count of 7.23 per transaction.
+3. **Fruithut:** This is a dataset of customer transactions from a US retail store focusing on selling fruits. The dataset contains 181,970 transactions, 1,265 items, and an average item count of 3.58 per transaction.
 
 ## Work
 
@@ -91,15 +91,15 @@ Submit by phase 4:
 
 - Code for the Two-Phase algorithm.
 - Code for the FHM algorithm.
-- Code for the experiment scripts
-- Results of experiments
-- Final video
+- Code for the experiment scripts.
+- Results of experiments.
+- Final video.
 
 We will submit our materials via a compressed file.
 
 ## Logistics
 
-We have a GitHub repository that can be found by clicking here[*here*](https://github.com/cosc-254-huim/huim). The repository is where we share code and data among the members of the group.
+We have a GitHub repository that can be found by clicking [*here*](https://github.com/cosc-254-huim/huim). The repository is where we share code and data among the members of the group.
 
 We plan to split up the work as follows. The first member's main responsibility is to write the code for the Two-Phase algorithm. Similarly, the second member's main responsibility is to write the code for the FHM algorithm. The third and fourth members' main responsibilities are to write the experiments that evaluate the two algorithms. All members are also responsible for producing the final video.
 
