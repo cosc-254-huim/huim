@@ -44,9 +44,9 @@ def get_util_lists_and_EUCS(db_path, item_twu_dict, I_star):
                         add_to_EUCS(item, next_item, EUCS, transac_util)
                     util_list_tuple = (tid, iutil, rutil)
                     if item in util_lists:
-                        util_lists[item].append(util_list_tuple)
+                        util_lists[(item,)].append(util_list_tuple)
                     else:
-                        util_lists[item] = [util_list_tuple]
+                        util_lists[(item,)] = [util_list_tuple]
     return util_lists, EUCS
 
 
