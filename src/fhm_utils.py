@@ -18,7 +18,7 @@ def get_I_star(item_twu_dict, minutil):
     I_star = {}
     for item, twu in item_twu_dict.items():
         if twu >= minutil:
-            I_star[item] = twu
+            I_star[(item,)] = twu
     return I_star
 
 
@@ -35,7 +35,8 @@ def get_util_lists_and_EUCS(db_path, item_twu_dict, I_star):
             item_util_tuples.sort(key=lambda t: item_twu_dict[int(t[0])])
             for i, item_util_tuple in enumerate(item_util_tuples):
                 item = int(item_util_tuple[0])
-                if item in I_star:
+                itemset = (item,)
+                if itemset in I_star:
                     iutil = int(item_util_tuple[1])
                     rutil = 0
                     for j in range(i + 1, len(item_util_tuples)):
@@ -43,10 +44,10 @@ def get_util_lists_and_EUCS(db_path, item_twu_dict, I_star):
                         next_item = int(item_util_tuples[j][0])
                         add_to_EUCS(item, next_item, EUCS, transac_util)
                     util_list_tuple = (tid, iutil, rutil)
-                    if item in util_lists:
-                        util_lists[(item,)].append(util_list_tuple)
+                    if itemset in util_lists:
+                        util_lists[itemset].append(util_list_tuple)
                     else:
-                        util_lists[(item,)] = [util_list_tuple]
+                        util_lists[itemset] = [util_list_tuple]
     return util_lists, EUCS
 
 
@@ -58,3 +59,9 @@ def add_to_EUCS(item, next_item, EUCS, transac_util):
             EUCS[item][next_item] = transac_util
     else:
         EUCS[item] = {next_item: transac_util}
+
+
+def get_e_in_P(P, ex, util_lists):
+    for e in util_lists[P]:
+        if e[0] == ex[0]:
+            return e
