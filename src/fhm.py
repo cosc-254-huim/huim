@@ -1,4 +1,5 @@
 import sys
+import time
 from fhm_utils import get_item_twu_dict, get_I_star, get_util_lists_and_EUCS, get_e_in_P
 
 
@@ -8,9 +9,7 @@ def fhm(db_path, minutil):
     util_lists, EUCS = get_util_lists_and_EUCS(db_path, item_twu_dict, I_star)
     hu_itemsets = []
     search((), I_star.keys(), minutil, I_star, util_lists, EUCS, hu_itemsets)
-    hu_itemsets.sort(key=lambda t: t[0][0], reverse=True)
-    print(f"hu_itemsets: {hu_itemsets}")
-    print(f"count: {len(hu_itemsets)}")
+    return hu_itemsets
 
 
 def search(P, extens_of_P, minutil, I_star, util_lists, EUCS, hu_itemsets):
@@ -51,4 +50,11 @@ def construct(P, Px, Py, util_lists):
 
 if __name__ == "__main__":
     args = sys.argv
-    fhm(db_path=args[1], minutil=int(args[2]))
+    start_time = time.time()
+    hu_itemsets = fhm(db_path=args[1], minutil=int(args[2]))
+    end_time = time.time()
+    hu_itemsets.sort(key=lambda t: t[0][0], reverse=True)
+    print(f"hu_itemsets: {hu_itemsets}")
+    print(f"count: {len(hu_itemsets)}")
+    total_time = (end_time - start_time) * 1000
+    print(f"time (ms): {total_time}")
