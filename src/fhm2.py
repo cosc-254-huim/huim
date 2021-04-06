@@ -108,7 +108,7 @@ class FHM:
         out.append(str(item))
         out.append("#UTIL:")
         out.append(str(util))
-        # print(" ".join(out))
+        print(" ".join(out))
 
     def construct(self, P, Px, Py):
         Pxy_util_list = UtilList(Py.item)
