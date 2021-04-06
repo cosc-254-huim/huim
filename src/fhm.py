@@ -1,20 +1,30 @@
 import sys
 import time
+from memory_profiler import memory_usage
 from typing import Union, List
 from fhm_utils import UtilList, UtilListElem, ItemUtilPair
 
 
 class FHM:
-    def __init__(self, db_path: str, minutil: int) -> None:
+    def __init__(self, db_path: str, output_path: str, minutil: int) -> None:
         self.db_path = db_path
+        self.output_path = output_path
         self.minutil = minutil
-        self.EUCS = {}
-        self.itemset_buffer = [0] * 200
+        self.itemset_buffer_size = 200
         self.hui_count = 0
-        self.runtime = 0
+        self.candidate_count = 0
+        self.start_time = 0
+        self.end_time = 0
 
     def run(self) -> None:
-        time_start = time.time()
+        self.mem_usage = memory_usage(self.fhm)
+
+    def fhm(self) -> None:
+        self.start_time = time.time()
+
+        self.EUCS = {}
+        self.itemset_buffer = [0] * self.itemset_buffer_size
+
         # first DB scan to get TWU of each item
         item_twu_dict = {}
         with open(self.db_path) as db:
@@ -29,8 +39,7 @@ class FHM:
                     else:
                         item_twu_dict[item] = transac_util
 
-        # create list of utility lists and
-        # map of itemsets to utility lists
+        # create list of utility lists and map of itemsets to utility lists
         util_lists = []
         itemset_util_list_dict = {}
         for item, twu in item_twu_dict.items():
@@ -77,8 +86,14 @@ class FHM:
                                 self.EUCS[item][next_item] = transac_util
                         else:
                             self.EUCS[item] = {next_item: transac_util}
+
+        self.output_file = open(self.output_path, "w")
+
+        # recursively search for itemsets
         self.search(self.itemset_buffer, 0, None, util_lists)
-        self.runtime = (time.time() - time_start) * 1000
+
+        self.output_file.close()
+        self.end_time = time.time()
 
     def search(
         self,
@@ -93,29 +108,30 @@ class FHM:
                 self.output(prefix, prefix_len, X.item, X.sum_iutils)
             if X.sum_iutils + X.sum_rutils >= self.minutil:
                 ex_util_lists = []
-                for j in range(len(util_lists)):
+                for j in range(i + 1, len(util_lists)):
                     Y = util_lists[j]
-                    try:
+                    if (X.item in self.EUCS) and (Y.item in self.EUCS[X.item]):
                         if self.EUCS[X.item][Y.item] >= self.minutil:
+                            self.candidate_count += 1
                             Pxy_util_list = self.construct(prefix_util_list, X, Y)
                             ex_util_lists.append(Pxy_util_list)
-                    except KeyError:
-                        continue
                 try:
                     self.itemset_buffer[prefix_len] = X.item
                 except IndexError:
-                    sys.exit("Error: length itemset_buffer is too small")
+                    sys.exit(
+                        f"Error: itemset_buffer_size ({self.itemset_buffer_size}) is too small"
+                    )
                 self.search(self.itemset_buffer, prefix_len + 1, X, ex_util_lists)
 
     def output(self, prefix: List[int], prefix_len: int, item: int, util: int) -> None:
         self.hui_count += 1
-        out = []
+        line = []
         for i in range(prefix_len):
-            out.append(str(prefix[i]))
-        out.append(str(item))
-        out.append("#UTIL:")
-        out.append(str(util))
-        print(" ".join(out))
+            line.append(str(prefix[i]))
+        line.append(str(item))
+        line.append("#UTIL:")
+        line.append(str(util))
+        self.output_file.write(" ".join(line) + "\n")
 
     def construct(self, P: Union[UtilList, None], Px: UtilList, Py: UtilList) -> UtilList:
         Pxy_util_list = UtilList(Py.item)
@@ -133,7 +149,8 @@ class FHM:
                     Pxy_util_list.add_elem(exy)
         return Pxy_util_list
 
-    def get_elem_with_tid(self, util_list: UtilList, tid: int) -> Union[UtilListElem, None]:
+    @staticmethod
+    def get_elem_with_tid(util_list: UtilList, tid: int) -> Union[UtilListElem, None]:
         elems = util_list.elems
         first = 0
         last = len(elems) - 1
@@ -146,13 +163,16 @@ class FHM:
             else:
                 return elems[mid]
 
-    def get_stats(self) -> None:
-        print(f"hui_count: {self.hui_count}")
-        print(f"runtime (ms): {self.runtime}")
+    def print_stats(self) -> None:
+        print("===============FHM ALGORITHM STATS===============")
+        print(f"total runtime (ms): {(self.end_time - self.start_time) * 1_000}")
+        print(f"high utility itemset count: {self.hui_count}")
+        print(f"candidate itemset count: {self.candidate_count}")
+        print(f"maximum memory used (MB): {max(self.mem_usage)}")
 
 
 if __name__ == "__main__":
     args = sys.argv
-    fhm = FHM(db_path=args[1], minutil=int(args[2]))
+    fhm = FHM(db_path=args[1], output_path=args[2], minutil=int(args[3]))
     fhm.run()
-    fhm.get_stats()
+    fhm.print_stats()
