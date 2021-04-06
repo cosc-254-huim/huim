@@ -6,8 +6,8 @@ from fhm_utils import UtilList, UtilListElem, ItemUtilPair
 
 
 class FHM:
-    def __init__(self, db_path: str, output_path: str, minutil: int) -> None:
-        self.db_path = db_path
+    def __init__(self, input_path: str, output_path: str, minutil: int) -> None:
+        self.input_path = input_path
         self.output_path = output_path
         self.minutil = minutil
         self.itemset_buffer_size = 200
@@ -27,7 +27,7 @@ class FHM:
 
         # first DB scan to get TWU of each item
         item_twu_dict = {}
-        with open(self.db_path) as db:
+        with open(self.input_path) as db:
             for transac in db:
                 transac_data = transac.split(":")
                 items = transac_data[0].split()
@@ -52,7 +52,7 @@ class FHM:
         util_lists.sort(key=lambda ul: item_twu_dict[ul.item])
 
         # second DB scan to populate utility lists and EUCS
-        with open(self.db_path) as db:
+        with open(self.input_path) as db:
             for tid, transac in enumerate(db):
                 transac_data = transac.split(":")
                 items = transac_data[0].split()
@@ -173,6 +173,6 @@ class FHM:
 
 if __name__ == "__main__":
     args = sys.argv
-    fhm = FHM(db_path=args[1], output_path=args[2], minutil=int(args[3]))
+    fhm = FHM(input_path=args[1], output_path=args[2], minutil=int(args[3]))
     fhm.run()
     fhm.print_stats()
