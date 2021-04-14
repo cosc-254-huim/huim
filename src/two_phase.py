@@ -22,6 +22,7 @@ class TwoPhase:
         allCandidates = []
 
         # first DB scan to get TWU of each item
+        candidates = set()
         item_twu_dict = {}
         entireDB = []
         with open(self.input_path) as db:
@@ -38,25 +39,9 @@ class TwoPhase:
                     else:
                         item_twu_dict[item] = transac_util
 
-        # create list of utility lists and map of itemsets to utility lists
-        util_lists = []
-        itemset_util_list_dict = {}
-        for item, twu in item_twu_dict.items():
-            if twu >= self.minutil:
-                util_list = UtilList(item)
-                itemset_util_list_dict[item] = util_list
-                util_lists.append(util_list)
-
-        # sort util_lists in order of ascending TWU
-        util_lists.sort(key=lambda ul: item_twu_dict[ul.item])
-
-        # second DB scan to populate utility lists and EUCS
-        with open(self.input_path) as db:
-            for tid, transac in enumerate(db):
-                transac_data = transac.split(":")
-                items = transac_data[0].split()
-                transac_util = int(transac_data[1])
-                item_utils = transac_data[2].split()
+        # apriori stuff
+        while len(candidates)>0:
+            
 
     def print_stats(self) -> None:
         print("===============Two Phase ALGORITHM STATS===============")
