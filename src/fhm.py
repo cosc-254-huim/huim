@@ -17,7 +17,7 @@ class FHM:
         self.end_time = 0
 
     def run(self) -> None:
-        self.mem_usage = memory_usage(self.fhm)
+        self.mem_usage = memory_usage(self.fhm, max_usage=True, max_iterations=1)
 
     def fhm(self) -> None:
         self.start_time = time.time()
@@ -87,12 +87,11 @@ class FHM:
                         else:
                             self.EUCS[item] = {next_item: transac_util}
 
-        self.output_file = open(self.output_path, "w")
-
         # recursively search for itemsets
-        self.search(self.itemset_buffer, 0, None, util_lists)
+        with open(self.output_path, "w") as out:
+            self.output_file = out
+            self.search(self.itemset_buffer, 0, None, util_lists)
 
-        self.output_file.close()
         self.end_time = time.time()
 
     def search(
@@ -168,7 +167,7 @@ class FHM:
         print(f"total runtime (ms): {(self.end_time - self.start_time) * 1_000}")
         print(f"high utility itemset count: {self.hui_count}")
         print(f"candidate itemset count: {self.candidate_count}")
-        print(f"maximum memory used (MB): {max(self.mem_usage)}")
+        print(f"maximum memory used (MB): {self.mem_usage}")
 
 
 if __name__ == "__main__":
