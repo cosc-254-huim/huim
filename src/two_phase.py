@@ -19,29 +19,81 @@ class TwoPhase:
 
     def twophase(self) -> None:
         self.start_time = time.time()
-        allCandidates = []
-
-        # first DB scan to get TWU of each item
-        candidates = set()
+        all_candidates = set()
         item_twu_dict = {}
-        entireDB = []
+
+        # phase one
         with open(self.input_path) as db:
             for transac in db:
-                transaction = set()
                 transac_data = transac.split(":")
                 items = transac_data[0].split()
                 transac_util = int(transac_data[1])
                 for item in items:
                     item = int(item)
-                    transaction.add(item)
                     if item in item_twu_dict:
                         item_twu_dict[item] += transac_util
                     else:
                         item_twu_dict[item] = transac_util
 
+        candidates = set()
+        for item in item_twu_dict:
+            if item_twu_dict.get(item) > self.minutil:
+                to_add = set()
+                to_add.add(item)
+                candidates.add(to_add)
+                all_candidates.add(to_add)
+
+        item_twu_dict.clear()
+        generated = set()
+        pruned = set()
+        k = 2
+        
         # apriori stuff
-        while len(candidates)>0:
-            
+        while len(candidates) > 0:
+            # generate
+            for item_set in candidates:
+                for item_set_2 in candidates:
+                    new_set = set.union(item_set_2, item_set)
+                    if len(new_set) == k:
+                        generated.add(new_set)
+            # prune
+            for item_set in generated:
+                add = True
+                for item in item_set:
+                    check = set()
+                    check.union(generated)
+                    check.remove(item)
+                    if check not in candidates:
+                        add = False
+                if add:
+                    pruned.add(item_set)
+            # clear candidates
+            candidates.clear()
+            # get utility
+            with open(self.input_path) as db:
+                for transac in db:
+                    transaction = set()
+                    transac_data = transac.split(":")
+                    items = transac_data[0].split()
+                    transac_util = int(transac_data[1])
+                    for item in items:
+                        item = int(item)
+                        transaction.add(item)
+                    for item_set in pruned:
+                        if all(elem in transaction for elem in item_set):
+                            item_twu_dict[item_set] += transac_util
+                        else:
+                            item_twu_dict[item_set] = transac_util
+            # add to candidates
+            for item_set in item_twu_dict:
+                if item_twu_dict.get(item) > self.minutil:
+                    candidates.add(item_set)
+                    all_candidates.add(item_set)
+            k += 1
+
+        # phase two??
+
+
 
     def print_stats(self) -> None:
         print("===============Two Phase ALGORITHM STATS===============")
