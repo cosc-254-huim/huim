@@ -6,27 +6,67 @@ from fhm_utils import UtilList, UtilListElem, ItemUtilPair
 
 
 class FHM:
+    """
+    Class for FHM.
+
+    Attributes:
+        input_path: relative path to the data file
+        output_path: relative path to the output file
+        minutil: minimum utility
+        output_file: output file to write high utility itemsets
+        itemset_buffer_size: size for itemset buffer
+        itemset_buffer: buffer for itemsets
+        EUCS: Estimated Utility Co-Occurrence Structure
+        mem_usage: maximum memory usage of algorithm
+        itemset_count: total number of itemsets
+        hui_count: number of high utility itemsets
+        candidate_count: number of candidate high utility itemsets
+        prune_count: number of itemsets pruned
+        runtime: total runtime of the algorithm
+    """
+
     def __init__(self, input_path: str, output_path: str, minutil: int) -> None:
+        """
+        Constructor for FHM.
+
+        Parameters:
+            input_path: relative path to the data file
+            output_path: relative path to the output file
+            minutil: minimum utility
+        """
         self.input_path = input_path
         self.output_path = output_path
         self.minutil = minutil
+        self.output_file = None
         self.itemset_buffer_size = 200
+        self.itemset_buffer = []
+        self.EUCS = {}
+        self.mem_usage = 0
+        self.itemset_count = 0
         self.hui_count = 0
         self.candidate_count = 0
-        self.start_time = 0
-        self.end_time = 0
+        self.prune_count = 0
+        self.runtime = 0
 
     def run(self) -> None:
+        """
+        Wrapper of the fhm() method that tracks memory usage.
+        """
+        # get max memory usage for one run of FHM
         self.mem_usage = memory_usage(self.fhm, max_usage=True, max_iterations=1)
 
     def fhm(self) -> None:
-        self.start_time = time.time()
+        """
+        Run the FHM algorithm.
+        """
+        start_time = time.time()  # start timing algorithm
 
-        self.EUCS = {}
+        # initialize buffer to store itemsets;
+        # we can use such a buffer because FHM is a depth first search algorithm
         self.itemset_buffer = [0] * self.itemset_buffer_size
 
         # first DB scan to get TWU of each item
-        item_twu_dict = {}
+        item_TWU_dict = {}  # dictionary of items and their TWU
         with open(self.input_path) as db:
             for transac in db:
                 transac_data = transac.split(":")
@@ -34,22 +74,27 @@ class FHM:
                 transac_util = int(transac_data[1])
                 for item in items:
                     item = int(item)
-                    if item in item_twu_dict:
-                        item_twu_dict[item] += transac_util
+                    if item in item_TWU_dict:
+                        item_TWU_dict[item] += transac_util
                     else:
-                        item_twu_dict[item] = transac_util
+                        item_TWU_dict[item] = transac_util
 
-        # create list of utility lists and map of itemsets to utility lists
+        self.itemset_count = (2 ** len(item_TWU_dict)) - 1
+
+        # initialize list of utility lists and dictionary of itemsets and their utility lists
+        # that only contain items with TWU >= minutil
         util_lists = []
-        itemset_util_list_dict = {}
-        for item, twu in item_twu_dict.items():
-            if twu >= self.minutil:
+        item_util_list_dict = {}
+        for item, TWU in item_TWU_dict.items():
+            if TWU >= self.minutil:
                 util_list = UtilList(item)
-                itemset_util_list_dict[item] = util_list
                 util_lists.append(util_list)
+                item_util_list_dict[item] = util_list
+            else:
+                self.prune_count += 1
 
         # sort util_lists in order of ascending TWU
-        util_lists.sort(key=lambda ul: item_twu_dict[ul.item])
+        util_lists.sort(key=lambda ul: item_TWU_dict[ul.item])
 
         # second DB scan to populate utility lists and EUCS
         with open(self.input_path) as db:
@@ -64,18 +109,20 @@ class FHM:
                 rutil = 0
                 for i in range(len(items)):
                     item_util_pair = ItemUtilPair(int(items[i]), int(item_utils[i]))
-                    if item_twu_dict[item_util_pair.item] >= self.minutil:
+                    if item_TWU_dict[item_util_pair.item] >= self.minutil:
                         item_pairs.append(item_util_pair)
                         rutil += item_util_pair.util
-                item_pairs.sort(key=lambda p: item_twu_dict[p.item])
 
-                # add items to utility lists
+                # sort item_pairs in order of ascending TWU
+                item_pairs.sort(key=lambda p: item_TWU_dict[p.item])
+
+                # populate the utility lists in item_util_list_dict with elements
                 for i in range(len(item_pairs)):
                     rutil -= item_pairs[i].util
                     util_list_elem = UtilListElem(tid, item_pairs[i].util, rutil)
-                    itemset_util_list_dict[item_pairs[i].item].add_elem(util_list_elem)
+                    item_util_list_dict[item_pairs[i].item].add_elem(util_list_elem)
 
-                    # create EUCS
+                    # populate EUCS
                     for j in range(i + 1, len(item_pairs)):
                         item = item_pairs[i].item
                         next_item = item_pairs[j].item
@@ -90,66 +137,142 @@ class FHM:
         # recursively search for itemsets
         with open(self.output_path, "w") as out:
             self.output_file = out
-            self.search(self.itemset_buffer, 0, None, util_lists)
+            self.search(0, None, util_lists)
 
-        self.end_time = time.time()
+        self.runtime = (time.time() - start_time) * 1_000  # stop timing algorithm
 
     def search(
         self,
-        prefix: List[int],
         prefix_len: int,
-        prefix_util_list: Union[UtilList, None],
-        util_lists: List[UtilList],
+        prefix_UL: Union[UtilList, None],
+        prefix_ext_ULs: List[UtilList],
     ) -> None:
-        for i in range(len(util_lists)):
-            X = util_lists[i]
-            if X.sum_iutils >= self.minutil:
-                self.output(prefix, prefix_len, X.item, X.sum_iutils)
-            if X.sum_iutils + X.sum_rutils >= self.minutil:
-                ex_util_lists = []
-                for j in range(i + 1, len(util_lists)):
-                    Y = util_lists[j]
-                    if (X.item in self.EUCS) and (Y.item in self.EUCS[X.item]):
-                        if self.EUCS[X.item][Y.item] >= self.minutil:
+        """
+        Recursive method to search all high utility itemsets and output them into a file.
+
+        Parameters:
+            prefix_len: length of the prefix itemset
+            prefix_UL: utility list of the prefix itemset
+            prefix_ext_ULs: list of utility lists for each extension of the prefix itemset
+        """
+        # for each extension x of the prefix
+        for i in range(len(prefix_ext_ULs)):
+            prefix_x_UL = prefix_ext_ULs[i]  # utility list for the itemset prefix U {x}
+
+            # output itemset if it has high utility
+            if prefix_x_UL.sum_iutils >= self.minutil:
+                self.output(prefix_len, prefix_x_UL.item, prefix_x_UL.sum_iutils)
+
+            # condition to explore extensions of prefix U {x}
+            if prefix_x_UL.sum_iutils + prefix_x_UL.sum_rutils >= self.minutil:
+                prefix_x_ext_ULs = []  # utility lists for the extensions of prefix U {x}
+
+                # for each extension y of the prefix such that y > x
+                for j in range(i + 1, len(prefix_ext_ULs)):
+                    prefix_y_UL = prefix_ext_ULs[j]  # utility list for the itemset prefix U {y}
+                    if (
+                        prefix_x_UL.item in self.EUCS
+                        and prefix_y_UL.item in self.EUCS[prefix_x_UL.item]
+                    ):
+                        # condition to explore extensions of prefix U {x, y}
+                        if self.EUCS[prefix_x_UL.item][prefix_y_UL.item] >= self.minutil:
                             self.candidate_count += 1
-                            Pxy_util_list = self.construct(prefix_util_list, X, Y)
-                            ex_util_lists.append(Pxy_util_list)
+
+                            # construct utility list for the itemset prefix U {x, y}
+                            # and append it to the utility lists for the extensions of prefix U {x}
+                            prefix_x_y_UL = self.construct(prefix_UL, prefix_x_UL, prefix_y_UL)
+                            prefix_x_ext_ULs.append(prefix_x_y_UL)
+                        else:
+                            self.prune_count += 1
+
+                # add item x to prefix in order to create new prefix
                 try:
-                    self.itemset_buffer[prefix_len] = X.item
+                    self.itemset_buffer[prefix_len] = prefix_x_UL.item
                 except IndexError:
                     sys.exit(
                         f"Error: itemset_buffer_size ({self.itemset_buffer_size}) is too small"
                     )
-                self.search(self.itemset_buffer, prefix_len + 1, X, ex_util_lists)
 
-    def output(self, prefix: List[int], prefix_len: int, item: int, util: int) -> None:
+                # recursive search to find all itemsets with the prefix: prefix U {x, y}
+                self.search(prefix_len + 1, prefix_x_UL, prefix_x_ext_ULs)
+
+            else:
+                self.prune_count += 1
+
+    def output(self, prefix_len: int, item: int, util: int) -> None:
+        """
+        Write the given high utility itemset and it's utility to self.output_file.
+
+        Parameters:
+            prefix_len: length of the prefix itemset
+            item: item extension of the prefix itemset
+            util: utility of the itemset
+        """
         self.hui_count += 1
         line = []
         for i in range(prefix_len):
-            line.append(str(prefix[i]))
+            line.append(str(self.itemset_buffer[i]))
         line.append(str(item))
         line.append("#UTIL:")
         line.append(str(util))
         self.output_file.write(" ".join(line) + "\n")
 
-    def construct(self, P: Union[UtilList, None], Px: UtilList, Py: UtilList) -> UtilList:
-        Pxy_util_list = UtilList(Py.item)
-        for ex in Px.elems:
-            ey = self.get_elem_with_tid(Py, ex.tid)
+    def construct(
+        self, prefix_UL: Union[UtilList, None], prefix_x_UL: UtilList, prefix_y_UL: UtilList
+    ) -> UtilList:
+        """
+        Construct the utility list for the itemset prefix U {x, y},
+        where x and y are item extension of prefix.
+
+        Parameters:
+            prefix_UL: utility list of the prefix itemset
+            prefix_x_UL: utility list of the itemset prefix U {x}
+            prefix_y_UL: utility list of the itemset prefix U {y}
+
+        Returns:
+            utility list of the itemset prefix U {x, y}
+        """
+        # initialize utility list for the itemset prefix U {x, y}
+        prefix_x_y_UL = UtilList(prefix_y_UL.item)
+
+        # for each element ex in the utility list of prefix U {x}
+        for ex in prefix_x_UL.elems:
+            # get element ey in the utility list of prefix U {y} with the same tid
+            ey = self.get_elem_with_tid(prefix_y_UL, ex.tid)
             if ey is None:
                 continue
-            if P is None:
+
+            # case when prefix is the empty set and x and y are 1-itemsets
+            if prefix_UL is None:
+                # create utility list element for prefix U {x, y}
+                # and add it to the utility list of prefix U {x, y}
                 exy = UtilListElem(ex.tid, ex.iutil + ey.iutil, ey.rutil)
-                Pxy_util_list.add_elem(exy)
+                prefix_x_y_UL.add_elem(exy)
+
+            # case when prefix is non-empty
             else:
-                e = self.get_elem_with_tid(P, ex.tid)
+                # get element e in the utility list of prefix with the same tid
+                e = self.get_elem_with_tid(prefix_UL, ex.tid)
                 if e is not None:
+                    # create utility list element for prefix U {x, y}
+                    # and add it to the utility list of prefix U {x, y}
                     exy = UtilListElem(ex.tid, ex.iutil + ey.iutil - e.iutil, ey.rutil)
-                    Pxy_util_list.add_elem(exy)
-        return Pxy_util_list
+                    prefix_x_y_UL.add_elem(exy)
+
+        return prefix_x_y_UL
 
     @staticmethod
     def get_elem_with_tid(util_list: UtilList, tid: int) -> Union[UtilListElem, None]:
+        """
+        Get the element in util_list that has tid as its transaction ID via binary search.
+
+        Parameters:
+            util_list: utility list to find element with tid
+            tid: transactio ID to find
+
+        Returns:
+            the element in the utility list with the given tid or None if no such element is found
+        """
         elems = util_list.elems
         first = 0
         last = len(elems) - 1
@@ -163,10 +286,15 @@ class FHM:
                 return elems[mid]
 
     def print_stats(self) -> None:
+        """
+        Print statistics for the FHM algorithm.
+        """
         print("===============FHM ALGORITHM STATS===============")
-        print(f"total runtime (ms): {(self.end_time - self.start_time) * 1_000}")
+        print(f"total runtime (ms): {self.runtime}")
+        print(f"total itemset count: {self.itemset_count}")
         print(f"high utility itemset count: {self.hui_count}")
         print(f"candidate itemset count: {self.candidate_count}")
+        print(f"pruned itemset count: {self.prune_count}")
         print(f"maximum memory used (MB): {self.mem_usage}")
 
 

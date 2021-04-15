@@ -47,9 +47,11 @@ class TwoPhase:
         generated = set()
         pruned = set()
         k = 2
-        
+
         # apriori stuff
         while len(candidates) > 0:
+            generated.clear()
+            pruned.clear()
             # generate
             for item_set in candidates:
                 for item_set_2 in candidates:
@@ -86,21 +88,42 @@ class TwoPhase:
                             item_twu_dict[item_set] = transac_util
             # add to candidates
             for item_set in item_twu_dict:
-                if item_twu_dict.get(item) > self.minutil:
+                if item_twu_dict.get(item_set) > self.minutil:
                     candidates.add(item_set)
                     all_candidates.add(item_set)
+            item_twu_dict.clear()
             k += 1
 
-        # phase two??
-
-
+        # phase two
+        item_set_utility = {}
+        with open(self.input_path) as db:
+            for transac in db:
+                transaction = []
+                utilities = []
+                transac_data = transac.split(":")
+                items = transac_data[0].split()
+                item_util = transac_data[2].split()
+                for item in items:
+                    item = int(item)
+                    transaction.append(item)
+                for utility in item_util:
+                    utility = int(utility)
+                    utilities.append(utility)
+                for item_set in all_candidates:
+                    set_util = 0
+                    if all(elem in transaction for elem in item_set):
+                        for i in range(len(transaction)):
+                            if transaction[i] in item_set:
+                                set_util += utilities[i]
+                    if set_util > self.minutil:
+                        item_set_utility[item_set] = set_util
 
     def print_stats(self) -> None:
         print("===============Two Phase ALGORITHM STATS===============")
         print(f"total runtime (ms): {(self.end_time - self.start_time) * 1_000}")
-        #print(f"high utility itemset count: {self.hui_count}")
-        #print(f"candidate itemset count: {self.candidate_count}")
-        #print(f"maximum memory used (MB): {max(self.mem_usage)}")
+        # print(f"high utility itemset count: {self.hui_count}")
+        # print(f"candidate itemset count: {self.candidate_count}")
+        # print(f"maximum memory used (MB): {max(self.mem_usage)}")
 
 
 if __name__ == "__main__":
