@@ -1,5 +1,7 @@
+import os
 import sys
 import time
+import csv
 from memory_profiler import memory_usage
 from typing import Union, List
 from fhm_utils import UtilList, UtilListElem, ItemUtilPair
@@ -268,7 +270,7 @@ class FHM:
 
         Parameters:
             util_list: utility list to find element with tid
-            tid: transactio ID to find
+            tid: transaction ID to find
 
         Returns:
             the element in the utility list with the given tid or None if no such element is found
@@ -297,9 +299,63 @@ class FHM:
         print(f"pruned itemset count: {self.prune_count}")
         print(f"maximum memory used (MB): {self.mem_usage}")
 
+    # initializes csv file by adding column names if csv file does not exist
+    def initialize_csv(self, filename) -> None:
+        fields = ['minimum utility', 'total runtime (ms)', 'total itemSet count', 'high utility itemSet count',
+                  'candidate itemSet count', 'pruned itemSet count', 'maximum memory used (MB)']
+
+        with open(filename, "a") as csvfile:
+            # creating a csv writer object
+            _writer = csv.writer(csvfile)
+
+            # writing the fields
+            _writer.writerow(fields)
+
+    # adds rows to the csv file
+    def experiment(self, filename) -> None:
+        # data rows of csv file
+        rows = [[self.minutil, self.runtime,
+                self.itemset_count,
+                self.hui_count,
+                self.candidate_count,
+                self.prune_count,
+                self.mem_usage]]
+        with open(filename, "a") as csvfile:
+            # creating a csv writer object
+            _writer = csv.writer(csvfile)
+
+            # writing the data rows
+            _writer.writerows(rows)
+
 
 if __name__ == "__main__":
     args = sys.argv
-    fhm = FHM(input_path=args[1], output_path=args[2], minutil=int(args[3]))
+    input_path = args[1]
+    output_path = args[2]
+    minutil = int(args[3])
+    fhm = FHM(input_path, output_path, minutil)
     fhm.run()
     fhm.print_stats()
+
+    # initializes csv file by adding column names if csv file does not exist
+    # adds rows to the csv file
+    # names the csv file after the name of the input file
+    if "chainstore.txt" in input_path:
+        if not os.path.exists("experiment_chain_store.csv"):
+            fhm.initialize_csv("experiment_chain_store.csv")
+        fhm.experiment("experiment_chain_store.csv")
+
+    if "DB_Utility.txt" in input_path:
+        if not os.path.exists("experiment_DB_Utility.csv"):
+            fhm.initialize_csv("experiment_DB_Utility.csv")
+        fhm.experiment("experiment_DB_Utility.csv")
+
+    if "ecommerce_utility_no_timestamps.txt" in input_path:
+        if not os.path.exists("experiment_ecommerce_utility_no_timestamps.csv"):
+            fhm.initialize_csv("experiment_ecommerce_utility_no_timestamps.csv")
+        fhm.experiment("experiment_ecommerce_utility_no_timestamps.csv")
+
+    if "foodmart.txt" in input_path:
+        if not os.path.exists("experiment_food_mart.csv"):
+            fhm.initialize_csv("experiment_food_mart.csv")
+        fhm.experiment("experiment_food_mart.csv")
