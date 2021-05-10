@@ -121,9 +121,37 @@ class TwoPhase:
     def print_stats(self) -> None:
         print("===============Two Phase ALGORITHM STATS===============")
         print(f"total runtime (ms): {(self.end_time - self.start_time) * 1_000}")
-        # print(f"high utility itemset count: {self.hui_count}")
-        # print(f"candidate itemset count: {self.candidate_count}")
-        # print(f"maximum memory used (MB): {max(self.mem_usage)}")
+        print(f"high utility itemset count: {self.hui_count}")
+        print(f"candidate itemset count: {self.candidate_count}")
+        print(f"maximum memory used (MB): {max(self.mem_usage)}")
+
+    # initializes csv file by adding column names if csv file does not exist
+    def initialize_csv(self, filename) -> None:
+        fields = ['minimum utility', 'total runtime (ms)', 'total itemSet count', 'high utility itemSet count',
+                  'candidate itemSet count', 'pruned itemSet count', 'maximum memory used (MB)']
+
+        with open(filename, "a") as csvfile:
+            # creating a csv writer object
+            _writer = csv.writer(csvfile)
+
+            # writing the fields
+            _writer.writerow(fields)
+    
+    # adds rows to the csv file
+    def experiment(self, filename) -> None:
+        # data rows of csv file
+        rows = [[self.minutil, self.runtime,
+                self.itemset_count,
+                self.hui_count,
+                self.candidate_count,
+                self.prune_count,
+                self.mem_usage]]
+        with open(filename, "a") as csvfile:
+            # creating a csv writer object
+            _writer = csv.writer(csvfile)
+
+            # writing the data rows
+            _writer.writerows(rows)
 
 
 if __name__ == "__main__":
@@ -131,3 +159,24 @@ if __name__ == "__main__":
     twoPhase = TwoPhase(input_path=args[1], output_path=args[2], minutil=int(args[3]))
     twoPhase.run()
     twoPhase.print_stats()
+
+    if "chainstore.txt" in input_path:
+        if not os.path.exists("experiment_chain_store.csv"):
+            fhm.initialize_csv("experiment_chain_store.csv")
+        fhm.experiment("experiment_chain_store.csv")
+
+    if "DB_Utility.txt" in input_path:
+        if not os.path.exists("experiment_DB_Utility.csv"):
+            fhm.initialize_csv("experiment_DB_Utility.csv")
+        fhm.experiment("experiment_DB_Utility.csv")
+
+    if "ecommerce_utility_no_timestamps.txt" in input_path:
+        if not os.path.exists("experiment_ecommerce_utility_no_timestamps.csv"):
+            fhm.initialize_csv("experiment_ecommerce_utility_no_timestamps.csv")
+        fhm.experiment("experiment_ecommerce_utility_no_timestamps.csv")
+
+    if "foodmart.txt" in input_path:
+        if not os.path.exists("experiment_food_mart.csv"):
+            fhm.initialize_csv("experiment_food_mart.csv")
+        fhm.experiment("experiment_food_mart.csv")
+
