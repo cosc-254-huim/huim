@@ -1,4 +1,5 @@
 import sys
+import os
 import time
 from memory_profiler import memory_usage
 
@@ -130,13 +131,13 @@ class TwoPhase:
         fields = ['minimum utility', 'total runtime (ms)', 'total itemSet count', 'high utility itemSet count',
                   'candidate itemSet count', 'pruned itemSet count', 'maximum memory used (MB)']
 
-        with open(filename, "a") as csvfile:
+        with open(filename, "w+") as csvfile:
             # creating a csv writer object
             _writer = csv.writer(csvfile)
 
             # writing the fields
             _writer.writerow(fields)
-    
+
     # adds rows to the csv file
     def experiment(self, filename) -> None:
         # data rows of csv file
@@ -146,7 +147,7 @@ class TwoPhase:
                 self.candidate_count,
                 self.prune_count,
                 self.mem_usage]]
-        with open(filename, "a") as csvfile:
+        with open(filename, "a+", newline='') as csvfile:
             # creating a csv writer object
             _writer = csv.writer(csvfile)
 
@@ -159,6 +160,17 @@ if __name__ == "__main__":
     twoPhase = TwoPhase(input_path=args[1], output_path=args[2], minutil=int(args[3]))
     twoPhase.run()
     twoPhase.print_stats()
+
+    # initializes csv file by adding column names if csv file does not exist
+    # adds rows to the csv file
+    # names the csv file after the name of the input file
+    # fetch the current directory
+    cur_path = os.getcwd()
+    cur_path1 = cur_path.split("/")[:-1] # ensures that we are no longer in src and are instead in 
+
+    if not os.path.isdir("/".join(cur_path1)+"/experiments"):
+        os.mkdir("/".join(cur_path1)+"/experiments")
+    os.chdir("/".join(cur_path1)+"/experiments")
 
     if "chainstore.txt" in input_path:
         if not os.path.exists("experiment_chain_store.csv"):
@@ -179,4 +191,23 @@ if __name__ == "__main__":
         if not os.path.exists("experiment_food_mart.csv"):
             fhm.initialize_csv("experiment_food_mart.csv")
         fhm.experiment("experiment_food_mart.csv")
+
+    if "retail.txt" in input_path:
+        if not os.path.exists("experiment_retail.csv"):
+            fhm.initialize_csv("experiment_retail.csv")
+        fhm.experiment("experiment_retail.csv")
+    
+    if "kosarak.txt" in input_path:
+        if not os.path.exists("experiment_kosarak.csv"):
+            fhm.initialize_csv("experiment_kosarak.csv")
+        fhm.experiment("experiment_kosarak.csv")
+
+    if "chess.txt" in input_path:
+        if not os.path.exists("experiment_chess.csv"):
+            fhm.initialize_csv("experiment_chess.csv")
+        fhm.experiment("experiment_chess.csv")
+
+    # return to the original directory so the shell script can correctly find the path
+    cur_path = os.getcwd().split("/")[:-1]
+    os.chdir("/".join(cur_path))
 

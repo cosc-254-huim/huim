@@ -49,6 +49,7 @@ class FHM:
         self.candidate_count = 0
         self.prune_count = 0
         self.runtime = 0
+        self.total_trans_util = 0
 
     def run(self) -> None:
         """
@@ -104,6 +105,7 @@ class FHM:
                 transac_data = transac.split(":")
                 items = transac_data[0].split()
                 transac_util = int(transac_data[1])
+                self.total_trans_util += transac_util
                 item_utils = transac_data[2].split()
 
                 # get items that have TWU >= minutil
@@ -298,13 +300,14 @@ class FHM:
         print(f"candidate itemset count: {self.candidate_count}")
         print(f"pruned itemset count: {self.prune_count}")
         print(f"maximum memory used (MB): {self.mem_usage}")
+        print(f"total transaction utility: {self.total_trans_util}")
 
     # initializes csv file by adding column names if csv file does not exist
     def initialize_csv(self, filename) -> None:
         fields = ['minimum utility', 'total runtime (ms)', 'total itemSet count', 'high utility itemSet count',
                   'candidate itemSet count', 'pruned itemSet count', 'maximum memory used (MB)']
 
-        with open(filename, "a") as csvfile:
+        with open(filename, "w+") as csvfile:
             # creating a csv writer object
             _writer = csv.writer(csvfile)
 
@@ -320,7 +323,7 @@ class FHM:
                 self.candidate_count,
                 self.prune_count,
                 self.mem_usage]]
-        with open(filename, "a") as csvfile:
+        with open(filename, "a+", newline='') as csvfile:
             # creating a csv writer object
             _writer = csv.writer(csvfile)
 
@@ -340,6 +343,14 @@ if __name__ == "__main__":
     # initializes csv file by adding column names if csv file does not exist
     # adds rows to the csv file
     # names the csv file after the name of the input file
+    # fetch the current directory
+    cur_path = os.getcwd()
+    cur_path1 = cur_path.split("/")[:-1] # ensures that we are no longer in src and are instead in 
+
+    if not os.path.isdir("/".join(cur_path1)+"/experiments"):
+        os.mkdir("/".join(cur_path1)+"/experiments")
+    os.chdir("/".join(cur_path1)+"/experiments")
+
     if "chainstore.txt" in input_path:
         if not os.path.exists("experiment_chain_store.csv"):
             fhm.initialize_csv("experiment_chain_store.csv")
@@ -359,3 +370,22 @@ if __name__ == "__main__":
         if not os.path.exists("experiment_food_mart.csv"):
             fhm.initialize_csv("experiment_food_mart.csv")
         fhm.experiment("experiment_food_mart.csv")
+
+    if "retail.txt" in input_path:
+        if not os.path.exists("experiment_retail.csv"):
+            fhm.initialize_csv("experiment_retail.csv")
+        fhm.experiment("experiment_retail.csv")
+    
+    if "kosarak.txt" in input_path:
+        if not os.path.exists("experiment_kosarak.csv"):
+            fhm.initialize_csv("experiment_kosarak.csv")
+        fhm.experiment("experiment_kosarak.csv")
+
+    if "chess.txt" in input_path:
+        if not os.path.exists("experiment_chess.csv"):
+            fhm.initialize_csv("experiment_chess.csv")
+        fhm.experiment("experiment_chess.csv")
+
+    # return to the original directory so the shell script can correctly find the path
+    cur_path = os.getcwd().split("/")[:-1]
+    os.chdir("/".join(cur_path))
