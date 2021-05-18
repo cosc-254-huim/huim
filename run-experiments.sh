@@ -1,11 +1,6 @@
 #!/bin/bash
-cd ..
-cd src
 
 # sample sizes array
-
-# chess
-declare -a sampleSizes5=(646997 539165 431332 323499 215666 107833)
 
 # retail
 declare -a sampleSizes1=(14910 11930 8947 5964)
@@ -22,33 +17,33 @@ declare -a sampleSizes4=(1600000 2000000 2400000 2800000)
 # go through each of the five sample sizes
 for ssize in "${sampleSizes1[@]}"
 do
-    echo "Sample size (RETAIL): $ssize" 
+    echo "Sample size (RETAIL): $ssize"
     # run each algorithm 2 times at each of the 5 sample sizes
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 two_phase.py ../datasets/retail.txt ../results/retail_results2.txt $ssize
+        python3 src/two_phase.py datasets/retail.txt results/retail_results2.txt $ssize
     done
 done
 
 for ssize in "${sampleSizes2[@]}"
 do
-    echo "Sample size (KOSARAK): $ssize" 
+    echo "Sample size (KOSARAK): $ssize"
     # run each algorithm 2 times at each of the 5 sample sizes
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 two_phase.py ../datasets/kosarak.txt ../results/kosarak_results2.txt $ssize
+        python3 src/two_phase.py datasets/kosarak.txt results/kosarak_results2.txt $ssize
     done
 done
 
 for ssize in "${sampleSizes3[@]}"
 do
-    echo "Sample size (FOODMART): $ssize" 
+    echo "Sample size (FOODMART): $ssize"
     # run each algorithm 2 times at each of the 5 sample sizes
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 two_phase.py ../datasets/foodmart.txt ../results/foodmart_results2.txt $ssize
+        python3 src/two_phase.py datasets/foodmart.txt results/foodmart_results2.txt $ssize
     done
 done
