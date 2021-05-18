@@ -25,6 +25,7 @@ class FHM:
         candidate_count: number of candidate high utility itemsets
         prune_count: number of itemsets pruned
         runtime: total runtime of the algorithm
+        total_trans_util: total transaction utility of the dataset
     """
 
     def __init__(self, input_path: str, output_path: str, minutil: int) -> None:
@@ -345,7 +346,7 @@ if __name__ == "__main__":
     # names the csv file after the name of the input file
     # fetch the current directory
     cur_path = os.getcwd()
-    cur_path1 = cur_path.split("/")[:-1] # ensures that we are no longer in src and are instead in 
+    cur_path1 = cur_path.split("/")[:-1] # ensures that we are no longer in src and are instead in
 
     if not os.path.isdir("/".join(cur_path1)+"/experiments"):
         os.mkdir("/".join(cur_path1)+"/experiments")
@@ -375,7 +376,7 @@ if __name__ == "__main__":
         if not os.path.exists("experiment_retail.csv"):
             fhm.initialize_csv("experiment_retail.csv")
         fhm.experiment("experiment_retail.csv")
-    
+
     if "kosarak.txt" in input_path:
         if not os.path.exists("experiment_kosarak.csv"):
             fhm.initialize_csv("experiment_kosarak.csv")
