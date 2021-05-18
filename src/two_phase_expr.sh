@@ -14,10 +14,10 @@ foodmart_minutils=(72066 12011 9609)
 kosarak_minutils=(5637016 4932390 4227762)
 
 for i in {0..2}; do
-    # DB_Utility - for testing, comment out when running actual experiments
-    #db_utility_minutil=${db_utility_minutils[i]}
-    #echo "minutil (DB_Utility) $db_utility_minutil"
-    #python3 two_phase.py ../datasets/DB_Utility.txt ../results/DB_Utility_two_phase_${db_utility_minutil}.txt $db_utility_minutil
+    # DB_Utility - for testing
+    db_utility_minutil=${db_utility_minutils[i]}
+    echo "minutil (DB_Utility): $db_utility_minutil"
+    python3 two_phase.py ../datasets/DB_Utility.txt ../results/DB_Utility_two_phase_${db_utility_minutil}.txt $db_utility_minutil
 
     # retail
     retail_minutil=${retail_minutils[i]}
