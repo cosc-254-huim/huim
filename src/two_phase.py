@@ -1,5 +1,7 @@
 import sys
 import time
+import csv
+import os
 from memory_profiler import memory_usage
 
 
@@ -196,6 +198,44 @@ class TwoPhase:
         print(f"maximum memory used (MB): {self.mem_usage}")
         print(f"total transaction utility: {self.total_trans_util}")
 
+    # initializes csv file by adding column names if csv file does not exist
+    def initialize_csv(self, filename) -> None:
+        fields = [
+            "minimum utility",
+            "total runtime (ms)",
+            "total itemSet count",
+            "high utility itemSet count",
+            "pruned itemSet count",
+            "maximum memory used (MB)",
+        ]
+
+        with open(filename, "w+") as csvfile:
+            # creating a csv writer object
+            _writer = csv.writer(csvfile)
+
+            # writing the fields
+            _writer.writerow(fields)
+
+    # adds rows to the csv file
+    def experiment(self, filename) -> None:
+        # data rows of csv file
+        rows = [
+            [
+                self.minutil,
+                self.runtime,
+                self.hui_count,
+                self.candidate_count,
+                self.prune_count,
+                self.mem_usage,
+            ]
+        ]
+        with open(filename, "a+", newline="") as csvfile:
+            # creating a csv writer object
+            _writer = csv.writer(csvfile)
+
+            # writing the data rows
+            _writer.writerows(rows)
+
 
 if __name__ == "__main__":
     args = sys.argv
@@ -205,3 +245,55 @@ if __name__ == "__main__":
     two_phase = TwoPhase(input_path, output_path, minutil)
     two_phase.run()
     two_phase.print_stats()
+
+    # initializes csv file by adding column names if csv file does not exist
+    # adds rows to the csv file
+    # names the csv file after the name of the input file
+    # fetch the current directory
+    cur_path = os.getcwd()
+    cur_path1 = cur_path.split("/")[
+        :-1
+    ]  # ensures that we are no longer in src and are instead in experiments
+
+    if not os.path.isdir("/".join(cur_path1) + "/experiments"):
+        os.mkdir("/".join(cur_path1) + "/experiments")
+    os.chdir("/".join(cur_path1) + "/experiments")
+
+    if "chainstore.txt" in input_path:
+        if not os.path.exists("experiment_chain_store2.csv"):
+            two_phase.initialize_csv("experiment_chain_store2.csv")
+        two_phase.experiment("experiment_chain_store2.csv")
+
+    if "DB_Utility.txt" in input_path:
+        if not os.path.exists("experiment_DB_Utility2.csv"):
+            two_phase.initialize_csv("experiment_DB_Utility2.csv")
+        two_phase.experiment("experiment_DB_Utility2.csv")
+
+    if "ecommerce_utility_no_timestamps.txt" in input_path:
+        if not os.path.exists("experiment_ecommerce_utility_no_timestamps2.csv"):
+            two_phase.initialize_csv("experiment_ecommerce_utility_no_timestamps2.csv")
+        two_phase.experiment("experiment_ecommerce_utility_no_timestamps2.csv")
+
+    if "foodmart.txt" in input_path:
+        if not os.path.exists("experiment_food_mart2.csv"):
+            two_phase.initialize_csv("experiment_food_mart2.csv")
+        two_phase.experiment("experiment_food_mart2.csv")
+
+    if "retail.txt" in input_path:
+        if not os.path.exists("experiment_retail2.csv"):
+            two_phase.initialize_csv("experiment_retail2.csv")
+        two_phase.experiment("experiment_retail2.csv")
+
+    if "kosarak.txt" in input_path:
+        if not os.path.exists("experiment_kosarak2.csv"):
+            two_phase.initialize_csv("experiment_kosarak2.csv")
+        two_phase.experiment("experiment_kosarak2.csv")
+
+    if "chess.txt" in input_path:
+        if not os.path.exists("experiment_chess2.csv"):
+            two_phase.initialize_csv("experiment_chess2.csv")
+        two_phase.experiment("experiment_chess2.csv")
+
+    # return to the original directory so the shell script can correctly find the path
+    cur_path = os.getcwd().split("/")[:-1]
+    os.chdir("/".join(cur_path))
