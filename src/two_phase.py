@@ -2,7 +2,7 @@ import sys
 import time
 import csv
 import os
-from memory_profiler import memory_usage
+# from memory_profiler import memory_usage
 
 
 class TwoPhase:
@@ -50,7 +50,8 @@ class TwoPhase:
         Wrapper of the two_phase() method that tracks memory usage.
         """
         # get max memory usage for one run of Two Phase
-        self.mem_usage = memory_usage(self.two_phase, max_usage=True, max_iterations=1)
+        # self.mem_usage = memory_usage(self.two_phase, max_usage=True, max_iterations=1)
+        self.two_phase()
 
     def two_phase(self) -> None:
         """
