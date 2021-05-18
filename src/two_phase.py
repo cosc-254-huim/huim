@@ -2,6 +2,7 @@ import sys
 import time
 import csv
 import os
+from typing import List
 # from memory_profiler import memory_usage
 
 
@@ -161,7 +162,7 @@ class TwoPhase:
         self.runtime = (time.time() - start_time) * 1_000
 
     @staticmethod
-    def itemset_generation(k_min_one_itemsets: list[list[int]]) -> list[list[int]]:
+    def itemset_generation(k_min_one_itemsets: List[List[int]]) -> List[List[int]]:
         """
         Generate candidate itemsets of length k using
         itemsets of length k-1 via algorithm described in
