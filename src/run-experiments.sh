@@ -27,7 +27,7 @@ do
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 .py ../datasets/retail.txt ../results/retail_results2.txt $ssize
+        python3 two_phase.py ../datasets/retail.txt ../results/retail_results2.txt $ssize
     done
 done
 
@@ -38,7 +38,7 @@ do
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 .py ../datasets/kosarak.txt ../results/kosarak_results2.txt $ssize
+        python3 two_phase.py ../datasets/kosarak.txt ../results/kosarak_results2.txt $ssize
     done
 done
 
@@ -49,7 +49,7 @@ do
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 .py ../datasets/foodmart.txt ../results/foodmart_results2.txt $ssize
+        python3 two_phase.py ../datasets/foodmart.txt ../results/foodmart_results2.txt $ssize
     done
 done
 
@@ -60,6 +60,6 @@ do
     for i in {1..1}
     do
         echo "Run number: $i"
-        python3 .py ../datasets/chainstore.txt ../results/chainstore_results2.txt $ssize
+        python3 two_phase.py ../datasets/chainstore.txt ../results/chainstore_results2.txt $ssize
     done
 done
