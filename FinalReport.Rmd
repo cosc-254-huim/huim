@@ -1,0 +1,210 @@
+---
+title: "Final Report"
+author: "Michael Bakshandeh"
+date: "5/19/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(mosaic)
+library(kableExtra)
+# install.packages("kableExtra")
+```
+
+# Background
+
+This report details our findings from running a variety of datasets on both the two-phase and FHM high utility itemset mining (HUIM) algorithms. We encountered runtime issues when trying to test two-phase on larger datasets, which made sense since our two-phase implementation relied on completely reading and recomputing TWUs as we generated more candidates. As a result, most of our comparisons between the two algorithms will be based on the ```foodmart``` dataset, which was a real, small-scale database. We will also discuss FHMs performance across different dataset sizes.
+
+## Computing Appropriate Threshold Values
+
+One of the challenges of conducting these experiments was computing appropriate $minutil$ values. Algorithm-specific papers used the **minimum utility threshold** to determine appropriate threshold values.
+
+Formally, we define **minimum utility threshold** $\delta$ as the percentage of total transaction utility values in the database, ie, $minutil = \delta * \sum_{T_q \in D}{tu(T_q)}$, where $T_q$ represents the $q^{th}$ transaction in quantitative transaction database $D$ and $tu(T)$ represents the utility of transaction $T$.
+
+In literature, the way that experiments are run is that $\delta$ is fixed at 1 and is consistently lowered until the algorithm takes too long to compute rationally. To simplify the amount of work we had to do, we based on threshold values $\theta$ directly from the literature rather than experimentally lowering $\delta$ until failure. The x-axis of all graphs in the report represents the actual $minutil$ values as a result of the computation listed in the definition above, rather than the $\delta$ values themselves.
+
+# Comparison between FHM and Two-Phase
+
+As detailed in our Project Proposal, we implemented two different HUIM algorithms, two-phase and FHM. Two-phase is the equivalent of an apriori algorithm, while FHM is meant to be a significant improvement on FHM by reducing runtime. To formalize these theroetical results, we ran each algorithm on the ```foodmart``` dataset.
+
+## Description of Dataset
+
+The ```foodmart``` dataset is a dataset of customer transactions from a retail store, obtained and transformed from SQL-Server 2000. The dataset contains 4,141 transactions and 1,559 items.
+
+## Graphs
+
+The survey paper along with specific paper algorithms used several different benchmarks for measuring the perforamce of the algorithms, namely runtime, memory usage, and pruned itemset count. We also looked into other metrics which will be discussed after.
+
+## Dataset Creation
+
+```{r}
+experiments_foodmart_fhm <- read.csv("experiments/experiment_food_mart.csv")
+head(experiments_foodmart_fhm)
+experiments_foodmart_fhm$algo <- "fhm"
+experiments_foodmart2 <- read.csv("experiments/experiment_food_mart2.csv")
+experiments_foodmart2$algo <- "two_phase"
+foodmart <- rbind(experiments_foodmart_fhm, experiments_foodmart2)
+head(foodmart) # to show what our database looks like
+```
+
+
+## Runtime Comparison
+
+The graph below shows the difference between runtimes for two-phase and FHM.
+
+```{r}
+# runtime
+ggplot(foodmart, aes(x=minimum.utility, y=total.runtime..ms.)) +
+  geom_line(aes(color=algo)) +
+  scale_y_continuous(trans='log10') +
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Total Runtime (ms)",
+    title = "Total Runtime as a function of Minutil Values",
+    color = "Algorithm"
+  )
+```
+
+A quick look at the graph tells us that, as theoretical findings would suggest, the total runtime tended to decrease as the $minutil$ increased, but the rate of change to the decrease appeared to fall as the minimum utility threshold increased (ie, $minutil$ increased and got closer to the total utility of the database). Furthermore, it appears that FHM was orders of magnitude more efficient than two-phase. We can see that two-phase never took less than 1,000,000 ms = 1,000 seconds = 16.67 minutes to complete, while FHM never took more than 500 ms = 0.5 seconds to complete.
+
+## Candidate Itemsets
+
+Graphing the number of candidate itemsets explains why the runtimes for the two algorithms were vastly different from each other.
+
+```{r}
+# number of candidate itemsets
+ggplot(foodmart, aes(x=minimum.utility, y=candidate.itemSet.count)) +
+  geom_line(aes(color=algo)) +
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Number of Candidate Itemsets Generated",
+    title = "Number of Candidate Itemsets as a function of Minutil Values",
+    color = "Algorithm"
+  )
+```
+
+We notice that for smaller $minutil$ values, the number of candidates generated is orders of magnitude different while for larger $minutil$ values, the number of candidates generated between the two algorithms appears to be very similar. This finding lines up with our theoretical understanding of the two algorithms, since one of the biggest problems of two-phases is that it often generates unreasonable candidates. While it is surprising that the number of generated candidates between the two algorithms converged as $minutil$ incresed, it makes sense that two-phase is still more inefficient since it requires many more passes through the dataset than FHM does.
+
+## Pruned Itemset Count
+
+The graph below shows the pruned itemset count for each algorithm.
+
+```{r}
+# pruned itemset count
+ggplot(foodmart, aes(x=minimum.utility, y=pruned.itemSet.count)) +
+  geom_line(aes(color=algo)) +
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Pruned Itemset Count",
+    title = "Pruned Itemset Count as a function of Minutil Values",
+    color = "Algorithm"
+  )
+```
+
+Again, we notice that at smaller values of $minutil$, FHM does a significantly better job in terms of efficiency since it successfully prunes ~6,000 more candidates than two-phase. Similar to the number of candidates, we notice that the number of pruned itemsets converages as the $minutil$ increases.
+
+## Memory Usage
+
+To compute memory usage, we used the memory profiler library from Python. The table below shows the memory usage for each algorithm at various sample sizes:
+
+```{r}
+memusage <- foodmart %>%
+  select(algo, minimum.utility, maximum.memory.used..MB.)
+kbl(memusage, booktabs = T, caption = "Memory Usage for FHM and Two Phase") %>%
+  kable_styling(latex_options = c("striped", "hold_position"),
+                full_width = F) 
+```
+
+We notice that there is very little within algorithm variation for memory usage, but two-phase clearly uses more memory than FHM. This is likely because two-phase requires more scans through memory and because we are considering more candidates with two-phase than with FHM.
+
+# FHM Specific Analysis
+
+We also were able to run FHM on different datasets to show how the algorithm responds to different datasets. We will be specifically looking at the runtime for these results since we did a cross comparison for all important metrics on ```fruitmart``` above.
+
+## Datasets
+
+We will be considering 4 different datasets in this section:
+
+1. ```chainstore:``` 
+2. ```retail:```
+3. ```kosarak:```
+4. ```chess:```
+
+## Runtime Graphs
+
+We will be graphing the runtimes for each algorithm below:
+
+```{r}
+chain_store <- read.csv("experiments/experiment_chain_store.csv")
+chain_store1 <- chain_store %>%
+  select(minimum.utility, total.runtime..ms.)
+chain_store1$db <- "chainstore"
+
+retail <-read.csv("experiments/experiment_retail.csv")
+retail1 <- retail %>%
+  select(minimum.utility, total.runtime..ms.)
+retail1$db <- "retail"
+
+kosarak <- read.csv("experiments/experiment_kosarak.csv")
+kosarak1 <- kosarak %>%
+  select(minimum.utility, total.runtime..ms.)
+kosarak1$db <- "kosarak"
+
+chess <- read.csv("experiments/experiment_chess.csv")
+chess1 <- chess %>%
+  select(minimum.utility, total.runtime..ms.)
+chess1$db <- "chess"
+
+temp <- rbind(chain_store1, retail1)
+temp1 <- rbind(temp, kosarak1)
+experiments <- rbind(temp1, chess1)
+experiments <- experiments %>%
+  group_by(minimum.utility, db) %>%
+  summarize(runtime = mean(total.runtime..ms.))
+
+# graph the runtime of each algorithm
+chess <- experiments %>% filter(db == 'chess')
+ggplot(chess, aes(x=minimum.utility, y=runtime)) +
+  geom_line(aes(color=db)) + 
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Runtime (ms)",
+    title = "Runtime of Chess as a function of Minutil Values",
+    color = "Database"
+  )
+
+retail <- experiments %>% filter(db == 'retail')
+ggplot(retail, aes(x=minimum.utility, y=runtime)) +
+  geom_line(aes(color=db)) + 
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Runtime (ms)",
+    title = "Runtime of Retail as a function of Minutil Values",
+    color = "Database"
+  )
+
+kosarak <- experiments %>% filter(db == 'kosarak')
+ggplot(kosarak, aes(x=minimum.utility, y=runtime)) +
+  geom_line(aes(color=db)) + 
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Runtime (ms)",
+    title = "Runtime of Kosarak as a function of Minutil Values",
+    color = "Database"
+  )
+
+chain_store <- experiments %>% filter(db == 'chainstore')
+ggplot(chain_store, aes(x=minimum.utility, y=runtime)) +
+  geom_line(aes(color=db)) + 
+  labs(
+    x = "Minimum Utility (minutil)",
+    y = "Runtime (ms)",
+    title = "Runtime of Chainstore as a function of Minutil Values",
+    color = "Database"
+  )
+```
+
+The graphs above appear to partially reaffirm what should theoretically happen as we increase the minutil. There are certain graphs that have strange looking graphs (for instance, chess) for reasons that we are not aware of. We did expect chess to have one of the largest runtimes since chess is a dense dataset while the others are sparse, but the dropoff in runtime should not be that steep. We also notice that there are some graphs like kosarak in which the runtime unexpectedly rises as the minimum utility increases, which could partially be due to changes in memory usage on our personal laptops as we ran more programs/tests.
+
