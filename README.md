@@ -23,7 +23,12 @@ To run an algorithm (either `two_phase.py` or `fhm.py`) execute something like:
 python src/some_algo.py datasets/dataset_name.txt results/result_file_name.txt minutil
 ```
 
-For example, to run the FHM alogrithm on the DB_Utility.txt dataset with a minutil of 30 and save the results in `results/fhm_results.txt`, execute the following:
+For example, to run the Two-Phase alogrithm on the DB_Utility.txt dataset with a minutil of 30 and save the results in `results/test_results.txt`, execute the following:
 ```
-python src/fhm.py datasets/DB_Utility.txt results/fhm_results.txt 30
+python src/two_phase.py datasets/DB_Utility.txt results/test_results.txt 30
+```
+
+Similarly, for the FHM algorithm, execute the command below:
+```
+python src/fhm.py datasets/DB_Utility.txt results/test_results.txt 30
 ```
