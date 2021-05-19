@@ -20,7 +20,6 @@ class FHM:
         itemset_buffer: buffer for itemsets
         EUCS: Estimated Utility Co-Occurrence Structure
         mem_usage: maximum memory usage of algorithm
-        itemset_count: total number of itemsets
         hui_count: number of high utility itemsets
         candidate_count: number of candidate high utility itemsets
         prune_count: number of itemsets pruned
@@ -45,7 +44,6 @@ class FHM:
         self.itemset_buffer = []
         self.EUCS = {}
         self.mem_usage = 0
-        self.itemset_count = 0
         self.hui_count = 0
         self.candidate_count = 0
         self.prune_count = 0
@@ -82,8 +80,6 @@ class FHM:
                         item_TWU_dict[item] += transac_util
                     else:
                         item_TWU_dict[item] = transac_util
-
-        self.itemset_count = (2 ** len(item_TWU_dict)) - 1
 
         # initialize list of utility lists and dictionary of itemsets and their utility lists
         # that only contain items with TWU >= minutil
@@ -296,7 +292,6 @@ class FHM:
         """
         print("===============FHM ALGORITHM STATS===============")
         print(f"total runtime (ms): {self.runtime}")
-        print(f"total itemset count: {self.itemset_count}")
         print(f"high utility itemset count: {self.hui_count}")
         print(f"candidate itemset count: {self.candidate_count}")
         print(f"pruned itemset count: {self.prune_count}")
@@ -305,8 +300,14 @@ class FHM:
 
     # initializes csv file by adding column names if csv file does not exist
     def initialize_csv(self, filename) -> None:
-        fields = ['minimum utility', 'total runtime (ms)', 'total itemSet count', 'high utility itemSet count',
-                  'candidate itemSet count', 'pruned itemSet count', 'maximum memory used (MB)']
+        fields = [
+            "minimum utility",
+            "total runtime (ms)",
+            "high utility itemSet count",
+            "candidate itemSet count",
+            "pruned itemSet count",
+            "maximum memory used (MB)",
+        ]
 
         with open(filename, "w+") as csvfile:
             # creating a csv writer object
@@ -318,13 +319,17 @@ class FHM:
     # adds rows to the csv file
     def experiment(self, filename) -> None:
         # data rows of csv file
-        rows = [[self.minutil, self.runtime,
-                self.itemset_count,
+        rows = [
+            [
+                self.minutil,
+                self.runtime,
                 self.hui_count,
                 self.candidate_count,
                 self.prune_count,
-                self.mem_usage]]
-        with open(filename, "a+", newline='') as csvfile:
+                self.mem_usage,
+            ]
+        ]
+        with open(filename, "a+", newline="") as csvfile:
             # creating a csv writer object
             _writer = csv.writer(csvfile)
 
@@ -346,46 +351,31 @@ if __name__ == "__main__":
     # names the csv file after the name of the input file
     # fetch the current directory
     cur_path = os.getcwd()
-    cur_path1 = cur_path.split("/")[:-1] # ensures that we are no longer in src and are instead in
+    cur_path1 = cur_path.split("/")[:-1]  # ensures that we are no longer in src and are instead in
 
-    if not os.path.isdir("/".join(cur_path1)+"/experiments"):
-        os.mkdir("/".join(cur_path1)+"/experiments")
-    os.chdir("/".join(cur_path1)+"/experiments")
-
-    if "chainstore.txt" in input_path:
-        if not os.path.exists("experiment_chain_store.csv"):
-            fhm.initialize_csv("experiment_chain_store.csv")
-        fhm.experiment("experiment_chain_store.csv")
+    if not os.path.isdir("/".join(cur_path1) + "/experiments"):
+        os.mkdir("/".join(cur_path1) + "/experiments")
+    os.chdir("/".join(cur_path1) + "/experiments")
 
     if "DB_Utility.txt" in input_path:
         if not os.path.exists("experiment_DB_Utility.csv"):
             fhm.initialize_csv("experiment_DB_Utility.csv")
         fhm.experiment("experiment_DB_Utility.csv")
 
-    if "ecommerce_utility_no_timestamps.txt" in input_path:
-        if not os.path.exists("experiment_ecommerce_utility_no_timestamps.csv"):
-            fhm.initialize_csv("experiment_ecommerce_utility_no_timestamps.csv")
-        fhm.experiment("experiment_ecommerce_utility_no_timestamps.csv")
+    if "chess.txt" in input_path:
+        if not os.path.exists("experiment_chess.csv"):
+            fhm.initialize_csv("experiment_chess.csv")
+        fhm.experiment("experiment_chess.csv")
 
     if "foodmart.txt" in input_path:
         if not os.path.exists("experiment_food_mart.csv"):
             fhm.initialize_csv("experiment_food_mart.csv")
         fhm.experiment("experiment_food_mart.csv")
 
-    if "retail.txt" in input_path:
-        if not os.path.exists("experiment_retail.csv"):
-            fhm.initialize_csv("experiment_retail.csv")
-        fhm.experiment("experiment_retail.csv")
-
-    if "kosarak.txt" in input_path:
-        if not os.path.exists("experiment_kosarak.csv"):
-            fhm.initialize_csv("experiment_kosarak.csv")
-        fhm.experiment("experiment_kosarak.csv")
-
-    if "chess.txt" in input_path:
-        if not os.path.exists("experiment_chess.csv"):
-            fhm.initialize_csv("experiment_chess.csv")
-        fhm.experiment("experiment_chess.csv")
+    if "BMS.txt" in input_path:
+        if not os.path.exists("experiment_BMS.csv"):
+            fhm.initialize_csv("experiment_BMS.csv")
+        fhm.experiment("experiment_BMS.csv")
 
     # return to the original directory so the shell script can correctly find the path
     cur_path = os.getcwd().split("/")[:-1]

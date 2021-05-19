@@ -16,7 +16,6 @@ class TwoPhase:
         minutil: minimum utility
         output_file: output file to write high utility itemsets
         mem_usage: maximum memory usage of algorithm
-        itemset_count: total number of itemsets
         hui_count: number of high utility itemsets
         candidate_count: number of candidate high utility itemsets
         prune_count: number of itemsets pruned
@@ -38,7 +37,6 @@ class TwoPhase:
         self.minutil = minutil
         self.output_file = None
         self.mem_usage = 0
-        self.itemset_count = 0
         self.hui_count = 0
         self.candidates = []
         self.candidate_count = 0
@@ -55,7 +53,7 @@ class TwoPhase:
 
     def two_phase(self) -> None:
         """
-        Run the FHM algorithm.
+        Run the Two-Phase algorithm.
         """
         start_time = time.time()
 
@@ -74,8 +72,6 @@ class TwoPhase:
                         item_TWU_dict[item] += transac_util
                     else:
                         item_TWU_dict[item] = transac_util
-
-        self.itemset_count = (2 ** len(item_TWU_dict)) - 1
 
         # get candidate high utility 1-itemsets with TWU >= minutil
         one_itemsets = []
@@ -164,8 +160,7 @@ class TwoPhase:
 
         self.runtime = (time.time() - start_time) * 1_000
 
-    @staticmethod
-    def itemset_generation(k_min_one_itemsets: List[List[int]]) -> List[List[int]]:
+    def itemset_generation(self, k_min_one_itemsets: List[List[int]]) -> List[List[int]]:
         """
         Generate candidate itemsets of length k using
         itemsets of length k-1 via algorithm described in
@@ -178,7 +173,9 @@ class TwoPhase:
             for j in range(i + 1, len(k_min_one_itemsets)):
                 k_min_1_itemset_j = k_min_one_itemsets[j]
                 # check to see if all but the last items are the same in the two itemsets
-                if k_min_1_itemset_i[:-1] == k_min_1_itemset_j[:-1]:
+                if self.sublist_equal(
+                    k_min_1_itemset_i, k_min_1_itemset_j, len(k_min_1_itemset_i) - 1
+                ):
                     k_itemset = k_min_1_itemset_i[:-1]
                     # add last item of the two itemsets in order
                     if k_min_1_itemset_i[-1] < k_min_1_itemset_j[-1]:
@@ -190,13 +187,19 @@ class TwoPhase:
                     k_itemsets.append(k_itemset)
         return k_itemsets
 
+    @staticmethod
+    def sublist_equal(list_i, list_j, to_index):
+        for i in range(to_index):
+            if list_i[i] != list_j[i]:
+                return False
+        return True
+
     def print_stats(self) -> None:
         """
         Print statistics for the Two Phase algorithm.
         """
         print("===============Two Phase ALGORITHM STATS===============")
         print(f"total runtime (ms): {self.runtime}")
-        print(f"total itemset count: {self.itemset_count}")
         print(f"high utility itemset count: {self.hui_count}")
         print(f"candidate itemset count: {self.candidate_count}")
         print(f"pruned itemset count: {self.prune_count}")
@@ -208,8 +211,8 @@ class TwoPhase:
         fields = [
             "minimum utility",
             "total runtime (ms)",
-            "total itemSet count",
             "high utility itemSet count",
+            "candidate itemSet count",
             "pruned itemSet count",
             "maximum memory used (MB)",
         ]
@@ -256,48 +259,31 @@ if __name__ == "__main__":
     # names the csv file after the name of the input file
     # fetch the current directory
     cur_path = os.getcwd()
-    cur_path1 = cur_path.split("/")[
-        :-1
-    ]  # ensures that we are no longer in src and are instead in experiments
+    cur_path1 = cur_path.split("/")[:-1]  # ensures that we are no longer in src and are instead in
 
     if not os.path.isdir("/".join(cur_path1) + "/experiments"):
         os.mkdir("/".join(cur_path1) + "/experiments")
     os.chdir("/".join(cur_path1) + "/experiments")
-
-    if "chainstore.txt" in input_path:
-        if not os.path.exists("experiment_chain_store2.csv"):
-            two_phase.initialize_csv("experiment_chain_store2.csv")
-        two_phase.experiment("experiment_chain_store2.csv")
 
     if "DB_Utility.txt" in input_path:
         if not os.path.exists("experiment_DB_Utility2.csv"):
             two_phase.initialize_csv("experiment_DB_Utility2.csv")
         two_phase.experiment("experiment_DB_Utility2.csv")
 
-    if "ecommerce_utility_no_timestamps.txt" in input_path:
-        if not os.path.exists("experiment_ecommerce_utility_no_timestamps2.csv"):
-            two_phase.initialize_csv("experiment_ecommerce_utility_no_timestamps2.csv")
-        two_phase.experiment("experiment_ecommerce_utility_no_timestamps2.csv")
+    if "chess.txt" in input_path:
+        if not os.path.exists("experiment_chess2.csv"):
+            two_phase.initialize_csv("experiment_chess2.csv")
+        two_phase.experiment("experiment_chess2.csv")
 
     if "foodmart.txt" in input_path:
         if not os.path.exists("experiment_food_mart2.csv"):
             two_phase.initialize_csv("experiment_food_mart2.csv")
         two_phase.experiment("experiment_food_mart2.csv")
 
-    if "retail.txt" in input_path:
-        if not os.path.exists("experiment_retail2.csv"):
-            two_phase.initialize_csv("experiment_retail2.csv")
-        two_phase.experiment("experiment_retail2.csv")
-
-    if "kosarak.txt" in input_path:
-        if not os.path.exists("experiment_kosarak2.csv"):
-            two_phase.initialize_csv("experiment_kosarak2.csv")
-        two_phase.experiment("experiment_kosarak2.csv")
-
-    if "chess.txt" in input_path:
-        if not os.path.exists("experiment_chess2.csv"):
-            two_phase.initialize_csv("experiment_chess2.csv")
-        two_phase.experiment("experiment_chess2.csv")
+    if "BMS.txt" in input_path:
+        if not os.path.exists("experiment_BMS2.csv"):
+            two_phase.initialize_csv("experiment_BMS2.csv")
+        two_phase.experiment("experiment_BMS2.csv")
 
     # return to the original directory so the shell script can correctly find the path
     cur_path = os.getcwd().split("/")[:-1]
