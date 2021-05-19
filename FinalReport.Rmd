@@ -10,32 +10,31 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(mosaic)
 library(kableExtra)
-# install.packages("kableExtra")
 ```
 
 # Background
 
-This report details our findings from running a variety of datasets on both the two-phase and FHM high utility itemset mining (HUIM) algorithms. We encountered runtime issues when trying to test two-phase on larger datasets, which made sense since our two-phase implementation relied on completely reading and recomputing TWUs as we generated more candidates. As a result, most of our comparisons between the two algorithms will be based on the ```foodmart``` dataset, which was a real, small-scale database. We will also discuss FHMs performance across different dataset sizes.
+This report details our findings from running a variety of datasets on both the Two-Phase and FHM high utility itemset mining (HUIM) algorithms. We encountered runtime issues when trying to test Two-Phase on larger datasets, which made sense since our Two-Phase implementation relied on completely reading and recomputing TWUs as we generated more candidates. As a result, most of our comparisons between the two algorithms will be based on the ```foodmart``` dataset, which was a real, small-scale database. We will also discuss FHMs performance across different dataset sizes.
 
 ## Computing Appropriate Threshold Values
 
 One of the challenges of conducting these experiments was computing appropriate $minutil$ values. Algorithm-specific papers used the **minimum utility threshold** to determine appropriate threshold values.
 
-Formally, we define **minimum utility threshold** $\delta$ as the percentage of total transaction utility values in the database, ie, $minutil = \delta * \sum_{T_q \in D}{tu(T_q)}$, where $T_q$ represents the $q^{th}$ transaction in quantitative transaction database $D$ and $tu(T)$ represents the utility of transaction $T$.
+Formally, we define **minimum utility threshold** $\delta$ as the percentage of total transaction utility values in the database, i.e., $minutil = \delta * \sum_{T_q \in D}{tu(T_q)}$, where $T_q$ represents the $q^{th}$ transaction in quantitative transaction database $D$ and $tu(T)$ represents the utility of transaction $T$.
 
-In literature, the way that experiments are run is that $\delta$ is fixed at 1 and is consistently lowered until the algorithm takes too long to compute rationally. To simplify the amount of work we had to do, we based on threshold values $\theta$ directly from the literature rather than experimentally lowering $\delta$ until failure. The x-axis of all graphs in the report represents the actual $minutil$ values as a result of the computation listed in the definition above, rather than the $\delta$ values themselves.
+In literature, the way that experiments are run is that $\delta$ is fixed at 1 and is consistently lowered until the algorithm takes too long to compute rationally. To simplify the amount of work we had to do, we based our threshold values $\theta$ directly from the literature rather than experimentally lowering $\delta$ until failure. The x-axis of all graphs in the report represents the actual $minutil$ values as a result of the computation listed in the definition above, rather than the $\delta$ values themselves.
 
 # Comparison between FHM and Two-Phase
 
-As detailed in our Project Proposal, we implemented two different HUIM algorithms, two-phase and FHM. Two-phase is the equivalent of an apriori algorithm, while FHM is meant to be a significant improvement on FHM by reducing runtime. To formalize these theroetical results, we ran each algorithm on the ```foodmart``` dataset.
+As detailed in our Project Proposal, we implemented two different HUIM algorithms, Two-Phase and FHM. Two-Phase is the equivalent of an apriori algorithm, while FHM is meant to be a significant improvement on FHM by reducing runtime and memory usage. To formalize these theoretical results, we ran each algorithm on the ```foodmart``` dataset.
 
 ## Description of Dataset
 
-The ```foodmart``` dataset is a dataset of customer transactions from a retail store, obtained and transformed from SQL-Server 2000. The dataset contains 4,141 transactions and 1,559 items.
+The ```foodmart``` dataset is a dataset of customer transactions from a retail store, obtained and transformed from SQL-Server 2000. The dataset contains 4,141 transactions, 1,559 items, and an average of 4.42 items per transaction. 
 
 ## Graphs
 
-The survey paper along with specific paper algorithms used several different benchmarks for measuring the perforamce of the algorithms, namely runtime, memory usage, and pruned itemset count. We also looked into other metrics which will be discussed after.
+The survey paper along with specific paper algorithms used several different benchmarks for measuring the performance of the algorithms, namely runtime, memory usage, and pruned itemset count. We also looked into other metrics which will be discussed after.
 
 ## Dataset Creation
 
@@ -52,7 +51,7 @@ head(foodmart) # to show what our database looks like
 
 ## Runtime Comparison
 
-The graph below shows the difference between runtimes for two-phase and FHM.
+The graph below shows the difference between runtimes for Two-Phase and FHM.
 
 ```{r}
 # runtime
@@ -67,7 +66,7 @@ ggplot(foodmart, aes(x=minimum.utility, y=total.runtime..ms.)) +
   )
 ```
 
-A quick look at the graph tells us that, as theoretical findings would suggest, the total runtime tended to decrease as the $minutil$ increased, but the rate of change to the decrease appeared to fall as the minimum utility threshold increased (ie, $minutil$ increased and got closer to the total utility of the database). Furthermore, it appears that FHM was orders of magnitude more efficient than two-phase. We can see that two-phase never took less than 1,000,000 ms = 1,000 seconds = 16.67 minutes to complete, while FHM never took more than 500 ms = 0.5 seconds to complete.
+A quick look at the graph tells us that, as theoretical findings would suggest, the total runtime tended to decrease as the $minutil$ increased, but the rate of change to the decrease appeared to fall as the minimum utility threshold increased (i.e., $minutil$ increased and got closer to the total utility of the database). Furthermore, it appears that FHM was orders of magnitude more efficient than Two-Phase. We can see that Two-Phase never took less than 1,000,000 ms = 1,000 seconds = 16.67 minutes to complete, while FHM never took more than 500 ms = 0.5 seconds to complete.
 
 ## Candidate Itemsets
 
@@ -85,7 +84,7 @@ ggplot(foodmart, aes(x=minimum.utility, y=candidate.itemSet.count)) +
   )
 ```
 
-We notice that for smaller $minutil$ values, the number of candidates generated is orders of magnitude different while for larger $minutil$ values, the number of candidates generated between the two algorithms appears to be very similar. This finding lines up with our theoretical understanding of the two algorithms, since one of the biggest problems of two-phases is that it often generates unreasonable candidates. While it is surprising that the number of generated candidates between the two algorithms converged as $minutil$ incresed, it makes sense that two-phase is still more inefficient since it requires many more passes through the dataset than FHM does.
+We notice that for smaller $minutil$ values, the number of candidates generated is orders of magnitude different while for larger $minutil$ values, the number of candidates generated between the two algorithms appears to be very similar. This finding lines up with our theoretical understanding of the two algorithms, since one of the biggest problems of Two-Phase is that it often generates unreasonable candidates. While it is surprising that the number of generated candidates between the two algorithms converged as $minutil$ increased, it makes sense that Two-Phase is still more inefficient since it requires many more passes through the dataset than FHM does.
 
 ## Pruned Itemset Count
 
@@ -103,7 +102,7 @@ ggplot(foodmart, aes(x=minimum.utility, y=pruned.itemSet.count)) +
   )
 ```
 
-Again, we notice that at smaller values of $minutil$, FHM does a significantly better job in terms of efficiency since it successfully prunes ~6,000 more candidates than two-phase. Similar to the number of candidates, we notice that the number of pruned itemsets converages as the $minutil$ increases.
+Again, we notice that at smaller values of $minutil$, FHM does a significantly better job in terms of efficiency since it successfully prunes ~6,000 more candidates than Two-Phase. Similar to the number of candidates, we notice that the number of pruned itemsets converges as the $minutil$ increases.
 
 ## Memory Usage
 
@@ -117,7 +116,7 @@ kbl(memusage, booktabs = T, caption = "Memory Usage for FHM and Two Phase") %>%
                 full_width = F) 
 ```
 
-We notice that there is very little within algorithm variation for memory usage, but two-phase clearly uses more memory than FHM. This is likely because two-phase requires more scans through memory and because we are considering more candidates with two-phase than with FHM.
+We notice that there is very little within algorithm variation for memory usage, but Two-Phase clearly uses more memory than FHM. This is likely because Two-Phase is a breadth first seach algorithm and thus has to store all candidates it finds in a list. On the other hand, FHM is a depth first search algorithm, which uses a itemset buffer (of fixed memory) to store multiple candidates.
 
 # FHM Specific Analysis
 
@@ -127,10 +126,10 @@ We also were able to run FHM on different datasets to show how the algorithm res
 
 We will be considering 4 different datasets in this section:
 
-1. ```chainstore:```: a dataset of customer transactions from a major grocery store chain in California, USA, containing 1,112,949 transactions and 46,086 items, obtained and transformed from NU-Mine Bench. 
-2. ```retail:```: customer transactions from an anonymous Belgian retail store. (source FIMI: http://fimi.ua.ac.be/data/)
-3. ```kosarak:```: transactions from click-stream data from an hungarian news portal. (source: FIMI)
-4. ```chess:```: prepared based on the UCI chess dataset. (source: FIMI)
+1. ```chainstore:``` customer transactions from a major grocery store chain in California, USA, containing 1,112,949 transactions, 46,086 items, and an average of 7.23 items per transaction, obtained and transformed from NU-Mine Bench. 
+2. ```retail:``` customer transactions from an anonymous Belgian retail store, containing 88,162 transactions, 16,470 items, and an average of 10.30 items per transaction. 
+3. ```kosarak:``` transactions from click-stream data from an Hungarian news portal, containing 990,002 transactions, 41,270 items, and an average of 8.1 items per transaction. 
+4. ```chess:``` prepared based on the UCI chess dataset, containing 3,196 transactions, 75 items, and an average of 37 items per transaction. 
 
 ## Runtime Graphs
 
@@ -206,5 +205,5 @@ ggplot(chain_store, aes(x=minimum.utility, y=runtime)) +
   )
 ```
 
-The graphs above appear to partially reaffirm what should theoretically happen as we increase the minutil. There are certain graphs that have strange looking graphs (for instance, chess) for reasons that we are not aware of. We did expect chess to have one of the largest runtimes since chess is a dense dataset while the others are sparse, but the dropoff in runtime should not be that steep. We also notice that there are some graphs like kosarak in which the runtime unexpectedly rises as the minimum utility increases, which could partially be due to changes in memory usage on our personal laptops as we ran more programs/tests.
+The graphs above appear to partially reaffirm what should theoretically happen as we increase the minutil. There are certain graphs that have strange looking graphs (for instance, chess) for reasons that we are not aware of. We did expect chess to have one of the largest runtimes since chess is a dense dataset while the others are sparse, but the drop off in runtime should not be that steep. We also notice that there are some graphs like kosarak in which the runtime unexpectedly rises as the minimum utility increases, which could partially be due to unexpected changes in CPU usage on our personal laptops.
 
