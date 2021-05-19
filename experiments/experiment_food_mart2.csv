@@ -1,0 +1,4 @@
+minimum utility,total runtime (ms),high utility itemSet count,candidate itemSet count,pruned itemSet count,maximum memory used (MB)
+12011,1152918.4420108795,258,1729,38346,155.76171875
+9609,1159555.311203003,468,2216,38141,157.0390625
+7206,1365880.0959587097,1487,43547,36896,157.16015625
