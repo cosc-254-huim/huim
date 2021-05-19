@@ -88,7 +88,10 @@ class TwoPhase:
         self.candidates += one_itemsets
 
         k_min_one_itemsets = one_itemsets
+        k = 2
         while True:
+            print("k:", k)
+
             # generate candidate high utility k-itemsets
             k_itemsets = self.itemset_generation(k_min_one_itemsets)
 
@@ -122,6 +125,7 @@ class TwoPhase:
                 break
             # otherwise, proceed to next k level
             k_min_one_itemsets = k_itemsets
+            k += 1
 
         self.candidate_count = len(self.candidates)
 
