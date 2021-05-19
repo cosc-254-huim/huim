@@ -7,7 +7,7 @@ db_utility_minutils=(40 30 20)
 chess_minutils=(646997 539165 431332)
 
 # foodmart
-foodmart_minutils=(72066 12011 9609)
+foodmart_minutils=(12011 9609 7206)
 
 # BMS
 bms_minutils=(2268000 2264000 2260000)
