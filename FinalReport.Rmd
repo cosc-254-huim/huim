@@ -26,7 +26,7 @@ In literature, the way that experiments are run is that $\delta$ is fixed at 1 a
 
 # Comparison between FHM and Two-Phase
 
-As detailed in our Project Proposal, we implemented two different HUIM algorithms, Two-Phase and FHM. Two-Phase is the equivalent of an apriori algorithm, while FHM is meant to be a significant improvement on FHM by reducing runtime and memory usage. To formalize these theoretical results, we ran each algorithm on the ```foodmart``` dataset.
+As detailed in our Project Proposal, we implemented two different HUIM algorithms, Two-Phase and FHM. Two-Phase is the equivalent of an apriori algorithm, while FHM is meant to be a significant improvement on Two-Phase by reducing runtime and memory usage. To formalize these theoretical results, we ran each algorithm on the ```foodmart``` dataset.
 
 ## Description of Dataset
 
