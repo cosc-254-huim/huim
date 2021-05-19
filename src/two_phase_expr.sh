@@ -1,36 +1,43 @@
 #!/bin/bash
 
 # minutils arrays
-
 db_utility_minutils=(40 30 20)
 
-# retail
-retail_minutils=(14910 11930 8947)
+# chess
+chess_minutils=(646997 539165 431332)
 
 # foodmart
 foodmart_minutils=(72066 12011 9609)
 
-# kosarak
-kosarak_minutils=(5637016 4932390 4227762)
+# BMS
+bms_minutils=(2268000 2264000 2260000)
 
 for i in {0..2}; do
     # DB_Utility - for testing
     db_utility_minutil=${db_utility_minutils[i]}
     echo "minutil (DB_Utility): $db_utility_minutil"
     python3 two_phase.py ../datasets/DB_Utility.txt ../results/DB_Utility_two_phase_${db_utility_minutil}.txt $db_utility_minutil
+    echo "minutil (DB_Utility) (FHM): $db_utility_minutil"
+    python3 fhm.py ../datasets/DB_Utility.txt ../results/DB_Utility_two_phase_${db_utility_minutil}.txt $db_utility_minutil
 
-    # retail
-    retail_minutil=${retail_minutils[i]}
-    echo "minutil (RETAIL): $retail_minutil"
-    python3 two_phase.py ../datasets/retail.txt ../results/retail_two_phase_${retail_minutil}.txt $retail_minutil
+    # chess
+    chess_minutil=${chess_minutils[i]}
+    echo "minutil (CHESS): $chess_minutil"
+    python3 two_phase.py ../datasets/chess.txt ../results/chess_two_phase_${chess_minutil}.txt $chess_minutil
+    echo "minutil (CHESS) (FHM): $chess_minutil"
+    python3 fhm.py ../datasets/chess.txt ../results/chess_fhm_${chess_minutil}.txt $chess_minutil
 
     # foodmart
     foodmart_minutil=${foodmart_minutils[i]}
     echo "minutil (FOODMART): $foodmart_minutil"
     python3 two_phase.py ../datasets/foodmart.txt ../results/foodmart_two_phase_${foodmart_minutil}.txt $foodmart_minutil
+    echo "minutil (FOODMART) (FHM): $retail_minutil"
+    python3 fhm.py ../datasets/foodmart.txt ../results/foodmart_fhm_${foodmart_minutil}.txt $foodmart_minutil
 
-    # kosarak
-    kosarak_minutil=${kosarak_minutils[i]}
-    echo "minutil (KOSARAK): $kosarak_minutil"
-    python3 two_phase.py ../datasets/kosarak.txt ../results/kosarak_two_phase_${kosarak_minutil}.txt $kosarak_minutil
+    # BMS
+    bms_minutil=${bms_minutils[i]}
+    echo "minutil (BMS): $bms_minutil"
+    python3 two_phase.py ../datasets/BMS.txt ../results/BMS_two_phase_${bms_minutil}.txt $bms_minutil
+    echo "minutil (BMS) (FHM): $bms_minutil"
+    python3 fhm.py ../datasets/BMS.txt ../results/BMS_fhm_${bms_minutil}.txt $bms_minutil
 done
